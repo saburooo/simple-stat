@@ -3,9 +3,10 @@ module StatTest exposing (..)
 import Expect exposing (equal, within, equalLists)
 import Test exposing (describe, test, Test, todo)
 import List
-import Stat exposing (avarage)
+import Stat exposing (average)
 import Stat exposing (deviation)
 import Stat exposing (standardDeviation)
+import Stat exposing (shapeRetio)
 import Expect exposing (lessThan)
 import Expect exposing (greaterThan)
 
@@ -28,7 +29,7 @@ calcuTest =
                         examplelist = [1,2,3,4,5,6,7,8,9,10]
                         listavarage = fifteenfive / toFloat (List.length examplelist)
                     in
-                        listavarage |> within (Expect.Absolute 0.001) (avarage examplelist)
+                        listavarage |> within (Expect.Absolute 0.001) (average examplelist)
             , test "偏差を求める" <|
                 \_ ->
                     let
@@ -49,5 +50,13 @@ calcuTest =
                         dataX = [4, 4, 5, 6, 6]
                     in
                         greaterThan 0.8 (standardDeviation dataX)
+            , test "シャープレシオを求める" <|
+                \_ ->
+                    let
+                        avarage = 5.0
+                        sD = 4.5
+                        kokusai = 3.0
+                    in
+                        0.44 |> within (Expect.Absolute 0.01) (shapeRetio avarage kokusai sD)
             ]
         ]
