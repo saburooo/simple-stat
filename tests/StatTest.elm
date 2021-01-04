@@ -40,7 +40,7 @@ calcuTest =
                         resultlist = [1, -4, -2, 3, 2]
                     in
                         resultlist
-                            |> equalLists (deviation samplelist) 
+                            |> equalLists (deviation samplelist)
             , test "標準偏差を求める。" <|
                 \_ ->
                     let
@@ -76,5 +76,13 @@ calcuTest =
                     in
                         Dict.fromList [ ("min", 10.2), ("max", 29.8) ]
                             |> equalDicts (fiducialInterval data sD)
+            , test "母平均μの95%信頼区間" <|
+                \_ ->
+                  let
+                      sD = 10
+                      data = 25
+                  in
+                      Dict.fromList [ ("min" ,40.2), ( "max", 59.8) ]
+                        |> equalDicts (muFiducialInterval data sD)
             ]
         ]
