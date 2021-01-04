@@ -81,8 +81,9 @@ calcuTest =
                   let
                       sD = 10
                       data = 25
+                      standardAverage = 80
                   in
                       Dict.fromList [ ("min" ,40.2), ( "max", 59.8) ]
-                        |> equalDicts (muFiducialInterval data sD)
+                        |> equalDicts (muFiducialInterval standardAverage data sD)
             ]
         ]

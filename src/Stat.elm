@@ -42,17 +42,27 @@ shapeRetio averageProfitability contryYield sD
 hypothesisTesting : Float -> Dict String Float
 hypothesisTesting n =
     let
-        myu = n / 2
+        mu = n / 2
         sigma = (sqrt n) / 2
     in
-        Dict.fromList [ ("min", (-1.96 * sigma) + myu), ("max", (1.96 * sigma) + myu)]
+        Dict.fromList [ ("min", (-1.96 * sigma) + mu), ("max", (1.96 * sigma) + mu)]
 
 
 -- 信頼区間の英訳をググった
 fiducialInterval : Float -> Float -> Dict String Float
 fiducialInterval data sD =
     let
-        minmyu = abs ((1.96 * sD) - data)
-        maxmyu = abs ((-1.96 * sD) - data)
+        minmu = abs ((1.96 * sD) - data)
+        maxmu = abs ((-1.96 * sD) - data)
     in
-        Dict.fromList [ ("min", minmyu), ("max", maxmyu) ]
+        Dict.fromList [ ("min", minmu), ("max", maxmu) ]
+
+
+-- 母平均はどんくらいかの信頼区間
+muFiducialInterval: Float -> Float -> Float -> Dict String Float
+muFiducialInterval standardAverage data sD =
+    let
+        minmu = abs (1.96 * ((sqrt data) / sD)) + standardAverage
+        maxmu = abs (1.96 * ((sqrt data) / sD)) + standardAverage
+    in
+        Dict.fromList [ ("min", minmu), ("max", maxmu) ]
