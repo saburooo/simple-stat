@@ -5,13 +5,14 @@ import Test exposing (describe, test, Test, todo)
 import List
 import Stat exposing (average)
 import Stat exposing (deviation)
-import Stat exposing (standardDeviation, fiducialInterval)
+import Stat exposing (standardDeviation, fiducialInterval, muFiducialInterval)
 import Stat exposing (shapeRetio, hypothesisTesting)
 import Expect exposing (lessThan)
 import Expect exposing (greaterThan)
 import Dict exposing (Dict)
 import Expect exposing (equalDicts)
 import Stat exposing (hypothesisTesting)
+import Test exposing (skip)
 
 
 calcuTest : Test
@@ -83,7 +84,15 @@ calcuTest =
                       data = 25
                       standardAverage = 80
                   in
-                      Dict.fromList [ ("min" ,40.2), ( "max", 59.8) ]
+                      Dict.fromList [ ("min" , 76.08), ( "max", 83.92) ]
                         |> equalDicts (muFiducialInterval standardAverage data sD)
+            , skip "カイ二乗分布で求めるパーセンテージ" <|
+                \_ ->
+                    0.28 |> within (Expect.Absolute 0.01) (x2Distribution 3 6)
+            , test "標本分散を求める" <|
+                \_ ->
+                    let
+                        mu = 80
+                        butterFlyHeight = [76,85,83]
             ]
         ]

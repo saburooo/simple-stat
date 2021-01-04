@@ -7,7 +7,7 @@ import Html.Attributes exposing (list)
 
 
 -- 算術平均
-average: List Float -> Float
+average: List Float -> Maybe Float
 average list
     = (sum list) / Basics.toFloat (length list)
 
@@ -62,7 +62,24 @@ fiducialInterval data sD =
 muFiducialInterval: Float -> Float -> Float -> Dict String Float
 muFiducialInterval standardAverage data sD =
     let
-        minmu = abs (1.96 * ((sqrt data) / sD)) + standardAverage
-        maxmu = abs (1.96 * ((sqrt data) / sD)) + standardAverage
+        minmu = abs (standardAverage + (-1.96 * ( sD / (sqrt data))))
+        maxmu = abs (standardAverage + ( 1.96 * ( sD / (sqrt data))))
     in
         Dict.fromList [ ("min", minmu), ("max", maxmu) ]
+
+
+
+-- カイ二乗分布でおそらく一番めんどくさい
+{-
+x2Distribution : Int -> Int -> Maybe Float
+x2Distribution x1 x2 =
+    let
+        z1 = case x1 of
+            3 -> 0.3916 
+
+            _ -> 1
+        
+        z2 = case x2 of
+            6 = 
+    in
+-}
