@@ -6,7 +6,7 @@ import List
 import Stat exposing (average)
 import Stat exposing (deviation)
 import Stat exposing (standardDeviation, fiducialInterval, muFiducialInterval)
-import Stat exposing (shapeRetio, hypothesisTesting)
+import Stat exposing (shapeRetio, hypothesisTesting, x2Distribution)
 import Expect exposing (lessThan)
 import Expect exposing (greaterThan)
 import Dict exposing (Dict)
@@ -90,6 +90,7 @@ calcuTest =
                 \_ ->
                     0.28 |> within (Expect.Absolute 0.01) (x2Distribution 3 6)
 
+{-
             , skip "標本分散を求める" <|
                 \_ ->
                     let
@@ -98,5 +99,6 @@ calcuTest =
                     in
                         Dict.fromList [ ("min", 5.34), ("max", 231.80) ]
                           |> equalDicts (specimenDispersion butterFlyHeight mu)
+-}
             ]
         ]

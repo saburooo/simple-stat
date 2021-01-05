@@ -3,6 +3,8 @@ module Stat exposing (..)
 import List exposing (sum, length, map)
 import Dict exposing (Dict)
 import Html.Attributes exposing (list)
+import StatTest exposing (data)
+import StatTest exposing (avarage)
 
 
 
@@ -23,7 +25,7 @@ deviation list
 -- 標準偏差(Standard Deviation) 略してS.D.
 standardDeviation:List Float -> Float
 standardDeviation list
-    = sqrt (sum (map (\e -> e * e) (deviation list)) / Basics.toFloat (length list))
+    = sqrt (sum (map (\e -> e ^ 2) (deviation list)) / Basics.toFloat (length list))
 
 
 
@@ -74,11 +76,12 @@ muFiducialInterval standardAverage data sD =
 pickUpDegreeOfFreedom:Int -> Float
 pickUpDegreeOfFreedom x =
     let
+        -- これ自由度が3の場合のカイ二乗分布だからな・・・
         xDict = Dict.fromList [
                (0, 1)
                ,(1, 0.8012)
                ,(2, 0.5724)
-               ,(3, 0.3619)
+               ,(3, 0.3916)
                ,(4, 0.2614)
                ,(5, 0.1717)
                ,(6, 0.1116)
@@ -121,13 +124,16 @@ x2Distribution x1 x2 =
     z1 = pickUpDegreeOfFreedom x1
     z2 = pickUpDegreeOfFreedom x2
   in
-      if z1 > z2 then
-        abs (z1 - z2)
-      else
-        abs (z2 - z1)
+        z1 - z2
 
 
+{-
 -- 標本分散 自由度を求める関数を何かしら実装する必要がある。
 specimenDispersion: List Float -> Float -> Float
 specimenDispersion data mu =
-  sum (map (\e -> (e - mu) ^ 2 ))
+    let
+        standard = standardDeviation data
+        dev = deviation data
+        v = sum (map (\e -> e ^ 2) dev)
+    in
+-}
