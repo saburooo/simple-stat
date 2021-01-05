@@ -86,13 +86,17 @@ calcuTest =
                   in
                       Dict.fromList [ ("min" , 76.08), ( "max", 83.92) ]
                         |> equalDicts (muFiducialInterval standardAverage data sD)
-            , skip "カイ二乗分布で求めるパーセンテージ" <|
+            , test "カイ二乗分布で求めるパーセンテージ" <|
                 \_ ->
                     0.28 |> within (Expect.Absolute 0.01) (x2Distribution 3 6)
-            , test "標本分散を求める" <|
+
+            , skip "標本分散を求める" <|
                 \_ ->
                     let
                         mu = 80
                         butterFlyHeight = [76,85,83]
+                    in
+                        Dict.fromList [ ("min", 5.34), ("max", 231.80) ]
+                          |> equalDicts (specimenDispersion butterFlyHeight mu)
             ]
         ]
