@@ -1,11 +1,11 @@
 module Stat exposing (..)
+{-
+TODO 度数と相対度数、累積度数など基本的なものを求める関数が必要だ
+-}
 
 import List exposing (sum, length, map)
 import Dict exposing (Dict)
 import Html.Attributes exposing (list)
-import StatTest exposing (data)
-import StatTest exposing (avarage)
-
 
 
 -- 算術平均
@@ -14,12 +14,10 @@ average list
     = (sum list) / Basics.toFloat (length list)
 
 
-
 -- 偏差(deviation)
 deviation:List Float -> List Float
 deviation list
     = map (\e -> e - (average list)) list
-
 
 
 -- 標準偏差(Standard Deviation) 略してS.D.
@@ -28,12 +26,7 @@ standardDeviation list
     = sqrt (sum (map (\e -> e ^ 2) (deviation list)) / Basics.toFloat (length list))
 
 
-
-{-
-（データ　−　平均値）÷　S.D.　＝　一個分以上離れていたら特殊なデータ
-それを応用したシャープレシオというものあり
--}
-
+-- シャープレシオ
 shapeRetio : Float -> Float -> Float -> Float
 shapeRetio averageProfitability contryYield sD
     = (averageProfitability - contryYield) / sD

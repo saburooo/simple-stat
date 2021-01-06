@@ -1,5 +1,7 @@
-# elmを使った統計ライブラリ
+# elmを使った統計ライブラリを目指して開発しています。
 
-## を目指して開発を考えています。
+統計学とelmを勉強している最中なのでツッコミ大歓迎です。
 
-統計学を勉強している最中なのでツッコミ大歓迎です。
+# License
+
+"simple-stat" is under [MIT license](https://en.wikipedia.org/wiki/MIT_License).
