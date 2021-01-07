@@ -1,18 +1,10 @@
 module StatTest exposing (..)
 
-import Expect exposing (equal, within, equalLists)
-import Test exposing (describe, test, Test, todo)
-import List
-import Stat exposing (average)
-import Stat exposing (deviation)
-import Stat exposing (standardDeviation, fiducialInterval, muFiducialInterval)
-import Stat exposing (shapeRetio, hypothesisTesting, x2Distribution)
-import Expect exposing (lessThan)
-import Expect exposing (greaterThan)
 import Dict exposing (Dict)
-import Expect exposing (equalDicts)
-import Stat exposing (hypothesisTesting)
-import Test exposing (skip)
+import Expect exposing (equal, equalDicts, equalLists, greaterThan, lessThan, within)
+import List
+import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution)
+import Test exposing (Test, describe, skip, test, todo)
 
 
 calcuTest : Test
@@ -22,83 +14,110 @@ calcuTest =
             [ test "リストの合計を計算する" <|
                 \_ ->
                     let
-                        fifteenfive = 55
-                        examplelist = [1,2,3,4,5,6,7,8,9,10]
+                        fifteenfive =
+                            55
+
+                        examplelist =
+                            [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
                     in
-                        equal fifteenfive (List.sum examplelist)
+                    equal fifteenfive (List.sum examplelist)
             , test "平均計算" <|
                 \_ ->
                     let
-                        fifteenfive = 55
-                        examplelist = [1,2,3,4,5,6,7,8,9,10]
-                        listavarage = fifteenfive / toFloat (List.length examplelist)
+                        fifteenfive =
+                            55
+
+                        examplelist =
+                            [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+
+                        listavarage =
+                            fifteenfive / toFloat (List.length examplelist)
                     in
-                        listavarage |> within (Expect.Absolute 0.001) (average examplelist)
+                    listavarage |> within (Expect.Absolute 0.001) (average examplelist)
             , test "偏差を求める" <|
                 \_ ->
                     let
-                        samplelist = [32, 27, 29, 34, 33]
-                        resultlist = [1, -4, -2, 3, 2]
+                        samplelist =
+                            [ 32, 27, 29, 34, 33 ]
+
+                        resultlist =
+                            [ 1, -4, -2, 3, 2 ]
                     in
-                        resultlist
-                            |> equalLists (deviation samplelist)
+                    resultlist
+                        |> equalLists (deviation samplelist)
             , test "標準偏差を求める。" <|
                 \_ ->
                     let
-                        dataY = [1, 2, 6, 7, 9]
+                        dataY =
+                            [ 1, 2, 6, 7, 9 ]
                     in
-                        greaterThan 3.03 (standardDeviation dataY)
+                    greaterThan 3.03 (standardDeviation dataY)
             , test "標準偏差を求めるその2" <|
                 \_ ->
                     let
-                        dataX = [4, 4, 5, 6, 6]
+                        dataX =
+                            [ 4, 4, 5, 6, 6 ]
                     in
-                        greaterThan 0.8 (standardDeviation dataX)
+                    greaterThan 0.8 (standardDeviation dataX)
             , test "シャープレシオを求める" <|
                 \_ ->
                     let
-                        avarage = 5.0
-                        sD = 4.5
-                        kokusai = 3.0
+                        avarage =
+                            5.0
+
+                        sD =
+                            4.5
+
+                        kokusai =
+                            3.0
                     in
-                        0.44 |> within (Expect.Absolute 0.01) (shapeRetio avarage kokusai sD)
+                    0.44 |> within (Expect.Absolute 0.01) (shapeRetio avarage kokusai sD)
             , test "不等式で正規分布を表示" <|
                 \_ ->
                     let
-                        n = 100
+                        n =
+                            100
                     in
-                        Dict.fromList [ ("min" ,40.2), ( "max", 59.8)]
-                            |> equalDicts (hypothesisTesting n)
+                    Dict.fromList [ ( "min", 40.2 ), ( "max", 59.8 ) ]
+                        |> equalDicts (hypothesisTesting n)
             , test "95%信頼区間" <|
                 \_ ->
                     let
-                        data = 20
-                        sD = 5
+                        data =
+                            20
+
+                        sD =
+                            5
                     in
-                        Dict.fromList [ ("min", 10.2), ("max", 29.8) ]
-                            |> equalDicts (fiducialInterval data sD)
+                    Dict.fromList [ ( "min", 10.2 ), ( "max", 29.8 ) ]
+                        |> equalDicts (fiducialInterval data sD)
             , test "母平均μの95%信頼区間" <|
                 \_ ->
-                  let
-                      sD = 10
-                      data = 25
-                      standardAverage = 80
-                  in
-                      Dict.fromList [ ("min" , 76.08), ( "max", 83.92) ]
+                    let
+                        sD =
+                            10
+
+                        data =
+                            25
+
+                        standardAverage =
+                            80
+                    in
+                    Dict.fromList [ ( "min", 76.08 ), ( "max", 83.92 ) ]
                         |> equalDicts (muFiducialInterval standardAverage data sD)
             , test "カイ二乗分布で求めるパーセンテージ" <|
                 \_ ->
                     0.28 |> within (Expect.Absolute 0.01) (x2Distribution 3 6)
 
-{-
-            , skip "標本分散を求める" <|
-                \_ ->
-                    let
-                        mu = 80
-                        butterFlyHeight = [76,85,83]
-                    in
-                        Dict.fromList [ ("min", 5.34), ("max", 231.80) ]
-                          |> equalDicts (specimenDispersion butterFlyHeight mu)
--}
+            {-
+               , skip "標本分散を求める" <|
+                   \_ ->
+                       let
+                           mu = 80
+                           butterFlyHeight = [76,85,83]
+                       in
+                           Dict.fromList [ ("min", 5.34), ("max", 231.80) ]
+                             |> equalDicts (specimenDispersion butterFlyHeight mu)
+            -}
             ]
         ]
