@@ -3,8 +3,12 @@ module StatTest exposing (..)
 import Dict exposing (Dict)
 import Expect exposing (equal, equalDicts, equalLists, greaterThan, lessThan, within)
 import List
-import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution)
+import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, randomSampling)
+
 import Test exposing (Test, describe, skip, test, todo)
+import Fuzz exposing (list, float)
+import Test exposing (fuzz)
+import Stat exposing (coefficientOfVariation)
 
 
 calcuTest : Test
@@ -109,15 +113,13 @@ calcuTest =
                 \_ ->
                     0.28 |> within (Expect.Absolute 0.01) (x2Distribution 3 6)
 
-            {-
-               , skip "標本分散を求める" <|
-                   \_ ->
-                       let
-                           mu = 80
-                           butterFlyHeight = [76,85,83]
-                       in
-                           Dict.fromList [ ("min", 5.34), ("max", 231.80) ]
-                             |> equalDicts (specimenDispersion butterFlyHeight mu)
-            -}
+            , todo "標本分散を求める。"
+
+            -- 一つの多次元リストからランダムにちゃんと値を取り出せるか
+            , todo "無作為抽出"
+
+            , test "変動係数" <|
+                \_ ->
+                    0.303 |> within (Expect.Absolute 0.001) (coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ])
             ]
         ]

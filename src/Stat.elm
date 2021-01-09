@@ -14,6 +14,7 @@ module Stat exposing (..)
 import Dict exposing (Dict)
 import Html.Attributes exposing (list)
 import List exposing (length, map, sum)
+import Html exposing (i)
 
 
 
@@ -25,11 +26,15 @@ import List exposing (length, map, sum)
 -}
 average : List Float -> Float
 average list =
-    sum list / Basics.toFloat (length list)
+     if length list == 0 then
+        0
+     else
+        sum list / Basics.toFloat (length list)
 
 
 
-{-|偏差(deviation)
+{-| 偏差(deviation)
+    サンプリングしたデータをその平均で引く
 
     deviation [ 32, 27, 29, 34, 33 ]
 
@@ -49,8 +54,20 @@ deviation list =
 -}
 standardDeviation : List Float -> Float
 standardDeviation list =
-    sqrt (sum (map (\e -> e ^ 2) (deviation list)) / Basics.toFloat (length list))
+    sqrt (sum (map (\e -> e ^ 2) (deviation list)) / Basics.toFloat ((length list) - 1))
 
+
+{-| 変動係数
+    標準偏差を平均で割ると算出できる。
+    一つのリストで求められる
+
+    coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ] 
+
+    -- OUT 0.303
+-}
+coefficientOfVariation : List Float -> Float
+coefficientOfVariation sampleData =
+    (standardDeviation sampleData) / (average sampleData)
 
 
 {- シャープレシオ
@@ -207,13 +224,20 @@ x2Distribution x1 x2 =
 
 
 
-{-
-   -- 標本分散 自由度を求める関数とそこからカイ二乗分布を割り出す関数を何かしら実装する必要がある。
-   specimenDispersion: List Float -> Float -> Float
-   specimenDispersion data mu =
-       let
-           standard = standardDeviation data
-           dev = deviation data
-           v = sum (map (\e -> e ^ 2) dev)
-       in
+-- 標本分散 自由度を求める関数とそこからカイ二乗分布を割り出す関数を何かしら実装する必要がある。
+specimenDispersion: List Float -> Float -> Float
+specimenDispersion data mu =
+    Debug.todo "カイ二乗分布をうまく求める方法を理解する。"
+
+-- 後で分割するかもしれないが、まだまだファイルは小さいのでまとめて書く
+
+-- RANDOM 
+
+{-| 無作為抽出
 -}
+randomSampling: List (List Float) -> Int -> List Float
+randomSampling multidimensionArray sampleNumber =
+    Debug.todo "どうやって多次元配列から抜き出せばよいだろうか"
+
+
+-- 確率
