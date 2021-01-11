@@ -246,7 +246,8 @@ randomSampling multidimensionArray sampleNumber =
 -- 確率
 
 
-{-| biDistributionProbability 二項分布の確率関数
+{-| biDistributionProbability
+    二項分布の確率関数
 
     biDistributionProbability 0.5 3 0
 
@@ -257,15 +258,6 @@ biDistributionProbability p n c =
     (toFloat (combination n c) / 1) * (p ^ toFloat c) * ((1 - p) ^ toFloat (n-c))
 
 
-{-| biDistribution
-    二項分布
-    最も基本的でかつわかりやすい離散型確率分布でこのライブラリではリストで返します。
-    ただし、再帰で計算するため、本来の結果と逆になってしまう。
-
-    biDistribution 0.5 3 3
-
-    OUT [0.125, 0.375, 0.375, 0.125]
--}
 biDistributionRecursion:Float -> Int -> Int -> List Float
 biDistributionRecursion p n c =
     case c of
@@ -282,6 +274,10 @@ biDistributionRecursion p n c =
     biDistribution 0.7 4
 
     OUT [0.2401, 0.4116, 0.2646, 0.0756, 0.0081]
+
+    biDistribution 0.5 3 3
+
+    OUT [0.125, 0.375, 0.375, 0.125]
 -}
 biDistribution: Float -> Int -> List Float
 biDistribution p n =
@@ -305,11 +301,6 @@ poissonDistributionProbability p n c =
         el * (mu ^ (toFloat c)) / toFloat (factorial c) 
 
 
-{-| poissonDistributionRecursion
-    ポアソン分布 二項分布と同じく離散型確率分布で親戚関係、
-    確率が非常に小さく、かつ試行の回数が非常に多いときに楽に計算できるやり方
-    確率と試行回数を受け取って List Float で返す。
--}
 poissonDistributionRecursion:Float -> Int -> Int -> List Float
 poissonDistributionRecursion p n c =
     case c of
@@ -328,6 +319,25 @@ poissonDistributionRecursion p n c =
 poisson:Float -> Int -> List Float
 poisson p n =
     List.reverse (List.map (\x -> roundNum 6 x) (poissonDistributionRecursion p n n))
+
+
+{-| standardNormalV
+    正規分布の標準化を求める
+    どんな正規分布もN（0， 1 ＾　2）の正規分布になれる。
+
+    standardNormalV 180 160 10
+
+    OUT 2.0
+-}
+standardNormalV: Float -> Float -> Float -> Float
+standardNormalV data x sd =
+    (data - x) / sd
+
+
+--------分布のための関数ここまで、--------------------------
+
+
+----------色々やってくれる優しい関数
 
 
 {-| factorial

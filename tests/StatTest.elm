@@ -9,7 +9,7 @@ import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, m
 import Test exposing (Test, describe, skip, test, todo)
 import Fuzz exposing (list, float)
 import Test exposing (fuzz)
-import Stat exposing (coefficientOfVariation)
+import Stat exposing (coefficientOfVariation, standardNormalV)
 import Stat exposing (biDistributionProbability)
 import Stat exposing (poisson)
 
@@ -151,5 +151,15 @@ calcuTest =
             , test "ポアソン分布" <|
                 \_ ->
                     equalLists [ 0.67032, 0.268128, 0.053626, 7.15e-3, 7.15e-4 ] (poisson 0.1 4)
+            , test "標準化正規変数" <|
+                \_ ->
+                    let
+                        x = 160
+                        sd = 10
+                    in
+                        2.0 |> within (Expect.Absolute 0.1) (standardNormalV 180 x sd)
+            , test "標準正規分布表をネットから取り寄せてそれをテスト" <|
+                \_ ->
+                    0.1578 |> within (Expect.Absolute 0.1) (sDNForDict 1.0)
             ]
         ]
