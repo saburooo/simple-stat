@@ -15,6 +15,9 @@ import Dict exposing (Dict)
 import Html.Attributes exposing (list)
 import List exposing (length, map, sum)
 import Html exposing (i)
+import Dict exposing (foldl)
+import Dict exposing (foldr)
+import String exposing (toInt)
 
 
 
@@ -229,10 +232,8 @@ specimenDispersion: List Float -> Float -> Float
 specimenDispersion data mu =
     Debug.todo "カイ二乗分布をうまく求める方法を理解する。"
 
--- 後で分割するかもしれないが、まだまだファイルは小さいのでまとめて書く
 
 -- RANDOM 
-
 {-| 無作為抽出
 -}
 randomSampling: List (List Float) -> Int -> List Float
@@ -240,4 +241,100 @@ randomSampling multidimensionArray sampleNumber =
     Debug.todo "どうやって多次元配列から抜き出せばよいだろうか"
 
 
+---------------------------------------------- 後で分割するかもしれないが、まだまだファイルは小さいのでまとめて書く ----------------------------------------------
 -- 確率
+
+
+{-| biDistributionProbability 二項分布の確率関数
+
+    biDistributionProbability 0.5 3 0
+
+    OUT 0.125
+-}
+biDistributionProbability: Float -> Int -> Int -> Float 
+biDistributionProbability p n c =
+    (toFloat (combination n c) / 1) * (p ^ toFloat c) * ((1 - p) ^ toFloat (n-c))
+
+
+{-| biDistribution
+    二項分布
+    最も基本的でかつわかりやすい離散型確率分布でこのライブラリではリストで返します。
+
+    biDistribution 0.5 3 3
+
+    OUT [0.125, 0.375, 0.375, 0.125]
+-}
+biDistribution:Float -> Int -> Int -> List Float
+biDistribution p n c =
+    case c of
+        0 -> (biDistributionProbability p n c) :: []
+
+        _ -> (biDistributionProbability p n c) :: biDistribution p n (c-1) 
+
+
+{-| poissonDistributionProbability
+    ポアソン分布の確率密度関数
+
+    poissonDistributionProbability 0.1, 4
+
+    OUT 7.15e-4 
+-}
+poissonDistributionProbability:Float -> Int -> Float
+poissonDistributionProbability p n =
+    (Basics.e ^ (toFloat -n * p)) * ((toFloat n * p) ^ toFloat n) / (toFloat (factorial n))
+
+
+{-| poissonDistribution
+    ポアソン分布 二項分布と同じく離散型確率分布で親戚関係、
+    確率が非常に小さく、かつ試行の回数が非常に多いときに楽に計算できるやり方
+    確率と試行回数を受け取って List Float で返す。
+
+    poissonDistribution 0.1 4
+
+    OUT [ 0.6703, 0.2681, 0.0536, 7.15e-3, 7.15e-4 ]
+-}
+poissonDistribution:Float -> Int -> List Float
+poissonDistribution p n =
+    case n of
+        0 -> (poissonDistributionProbability p n) :: []
+
+        _ -> (poissonDistributionProbability p n) :: (poissonDistribution p (n-1))
+
+
+{-| factorial
+    階乗計算で再帰で実装する典型的な計算式です。
+
+    factorial 5
+
+    OUT 120
+-}
+factorial : Int -> Int
+factorial n =
+    case n of
+        0 -> 1
+
+        _ -> n * (factorial (n-1))
+
+
+{-| permutation
+    順列
+
+    permutation 4 2
+
+    OUT 12
+-}
+permutation : Int -> Int -> Int
+permutation n m =
+    (factorial n) // (factorial (n - m))
+
+
+{-| combination
+    組み合わせ
+
+    combination 10 3
+
+    OUT 120
+-}
+combination : Int -> Int -> Int
+combination n m =
+    (factorial n) // ((factorial (n - m)) * (factorial m))

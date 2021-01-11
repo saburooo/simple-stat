@@ -3,12 +3,15 @@ module StatTest exposing (..)
 import Dict exposing (Dict)
 import Expect exposing (equal, equalDicts, equalLists, greaterThan, lessThan, within)
 import List
-import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, randomSampling)
+import Round exposing (roundNum)
+import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, randomSampling, factorial, permutation,combination, biDistributionProbability, biDistribution)
 
 import Test exposing (Test, describe, skip, test, todo)
 import Fuzz exposing (list, float)
 import Test exposing (fuzz)
 import Stat exposing (coefficientOfVariation)
+import Stat exposing (biDistributionProbability)
+import Stat exposing (poissonDistribution)
 
 
 calcuTest : Test
@@ -121,5 +124,32 @@ calcuTest =
             , test "変動係数" <|
                 \_ ->
                     0.303 |> within (Expect.Absolute 0.001) (coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ])
+            , test "階乗" <|
+                \_ ->
+                    equal 120 (factorial 5)
+            , test "順列" <|
+                \_ ->
+                    equal 720 (permutation 10 3)
+            , test "10人の中で3人を選ぶ組み合わせ" <|
+                \_ ->
+                    equal 120 (combination 10 3)
+            , test "二項分布の確率密度。" <|
+                \_ ->
+                    let
+                        threeCointhrowZero = 0.125
+                    in
+                        threeCointhrowZero |> within (Expect.Absolute 0.001) (biDistributionProbability 0.5 3 0)
+            , test "二項分布 <= 奇数編。" <|
+                \_ ->
+                    equalLists [0.125, 0.375, 0.375, 0.125] (biDistribution 0.5 3 3)
+            , test "二項分布 <= 偶数編" <|
+                \_ ->
+                    equalLists [0.2401, 0.4116, 0.2646, 0.0756, 0.0081] (List.map (\e -> roundNum 4 e) (biDistribution 0.7 4 4))
+            , test "二項分布 <= 奇数編、その2" <|
+                \_ ->
+                    equalLists [ 0.064, 0.288, 0.432, 0.216 ] (List.reverse (List.map (\e -> roundNum 3 e) (biDistribution 0.6 3 3)))
+            , test "ポアソン分布" <|
+                \_ ->
+                    equalLists [ 0.6703, 0.2681, 0.0536, 7.15e-3, 7.15e-4 ] (poissonDistribution 0.1 4)
             ]
         ]
