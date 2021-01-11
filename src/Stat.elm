@@ -18,6 +18,7 @@ import Html exposing (i)
 import Dict exposing (foldl)
 import Dict exposing (foldr)
 import String exposing (toInt)
+import Round exposing (roundNum)
 
 
 
@@ -259,17 +260,32 @@ biDistributionProbability p n c =
 {-| biDistribution
     二項分布
     最も基本的でかつわかりやすい離散型確率分布でこのライブラリではリストで返します。
+    ただし、再帰で計算するため、本来の結果と逆になってしまう。
 
     biDistribution 0.5 3 3
 
     OUT [0.125, 0.375, 0.375, 0.125]
 -}
-biDistribution:Float -> Int -> Int -> List Float
-biDistribution p n c =
+biDistributionRecursion:Float -> Int -> Int -> List Float
+biDistributionRecursion p n c =
     case c of
         0 -> (biDistributionProbability p n c) :: []
 
-        _ -> (biDistributionProbability p n c) :: biDistribution p n (c-1) 
+        _ -> (biDistributionProbability p n c) :: biDistributionRecursion p n (c-1) 
+
+
+{-| biDistribution
+    二項分布、再帰で求めるその数をなんとかそれっぽくするため
+    ひっくり返します。
+    しかし奇数のときはひっくり返さないほうが良さそう？(要検証)
+
+    biDistribution 0.7 4
+
+    OUT [0.2401, 0.4116, 0.2646, 0.0756, 0.0081]
+-}
+biDistribution: Float -> Int -> List Float
+biDistribution p n =
+    List.reverse (List.map (\x -> roundNum n x) (biDistributionRecursion p n n))
 
 
 {-| poissonDistributionProbability
@@ -277,28 +293,41 @@ biDistribution p n c =
 
     poissonDistributionProbability 0.1, 4
 
-    OUT 7.15e-4 
+    OUT 7.15e-4
 -}
-poissonDistributionProbability:Float -> Int -> Float
-poissonDistributionProbability p n =
-    (Basics.e ^ (toFloat -n * p)) * ((toFloat n * p) ^ toFloat n) / (toFloat (factorial n))
+poissonDistributionProbability:Float -> Int -> Int -> Float
+poissonDistributionProbability p n c =
+    let
+        nn = toFloat n
+        mu = p * nn
+        el = Basics.e ^ -mu
+    in
+        el * (mu ^ (toFloat c)) / toFloat (factorial c) 
 
 
-{-| poissonDistribution
+{-| poissonDistributionRecursion
     ポアソン分布 二項分布と同じく離散型確率分布で親戚関係、
     確率が非常に小さく、かつ試行の回数が非常に多いときに楽に計算できるやり方
     確率と試行回数を受け取って List Float で返す。
+-}
+poissonDistributionRecursion:Float -> Int -> Int -> List Float
+poissonDistributionRecursion p n c =
+    case c of
+        0 -> (poissonDistributionProbability p n c) :: []
 
-    poissonDistribution 0.1 4
+        _ -> (poissonDistributionProbability p n c) :: (poissonDistributionRecursion p n (c-1))
+
+
+{-| poisson
+    再帰の都合上逆向きになるので逆さまにひっくり返す。
+
+    poisson 0.1 4
 
     OUT [ 0.6703, 0.2681, 0.0536, 7.15e-3, 7.15e-4 ]
 -}
-poissonDistribution:Float -> Int -> List Float
-poissonDistribution p n =
-    case n of
-        0 -> (poissonDistributionProbability p n) :: []
-
-        _ -> (poissonDistributionProbability p n) :: (poissonDistribution p (n-1))
+poisson:Float -> Int -> List Float
+poisson p n =
+    List.reverse (List.map (\x -> roundNum 6 x) (poissonDistributionRecursion p n n))
 
 
 {-| factorial

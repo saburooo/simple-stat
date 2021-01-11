@@ -11,7 +11,7 @@ import Fuzz exposing (list, float)
 import Test exposing (fuzz)
 import Stat exposing (coefficientOfVariation)
 import Stat exposing (biDistributionProbability)
-import Stat exposing (poissonDistribution)
+import Stat exposing (poisson)
 
 
 calcuTest : Test
@@ -141,15 +141,15 @@ calcuTest =
                         threeCointhrowZero |> within (Expect.Absolute 0.001) (biDistributionProbability 0.5 3 0)
             , test "二項分布 <= 奇数編。" <|
                 \_ ->
-                    equalLists [0.125, 0.375, 0.375, 0.125] (biDistribution 0.5 3 3)
+                    equalLists [0.125, 0.375, 0.375, 0.125] (biDistribution 0.5 3)
             , test "二項分布 <= 偶数編" <|
                 \_ ->
-                    equalLists [0.2401, 0.4116, 0.2646, 0.0756, 0.0081] (List.map (\e -> roundNum 4 e) (biDistribution 0.7 4 4))
+                    equalLists [0.2401, 0.4116, 0.2646, 0.0756, 0.0081] (List.reverse (biDistribution 0.7 4))
             , test "二項分布 <= 奇数編、その2" <|
                 \_ ->
-                    equalLists [ 0.064, 0.288, 0.432, 0.216 ] (List.reverse (List.map (\e -> roundNum 3 e) (biDistribution 0.6 3 3)))
+                    equalLists [ 0.064, 0.288, 0.432, 0.216 ] (biDistribution 0.6 3)
             , test "ポアソン分布" <|
                 \_ ->
-                    equalLists [ 0.6703, 0.2681, 0.0536, 7.15e-3, 7.15e-4 ] (poissonDistribution 0.1 4)
+                    equalLists [ 0.67032, 0.268128, 0.053626, 7.15e-3, 7.15e-4 ] (poisson 0.1 4)
             ]
         ]
