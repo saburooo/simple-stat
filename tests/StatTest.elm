@@ -10,8 +10,7 @@ import Test exposing (Test, describe, skip, test, todo)
 import Fuzz exposing (list, float)
 import Test exposing (fuzz)
 import Stat exposing (coefficientOfVariation, standardNormalV)
-import Stat exposing (biDistributionProbability)
-import Stat exposing (poisson)
+import Stat exposing (poisson, sDNForDict, confidenceLimit)
 
 
 calcuTest : Test
@@ -160,6 +159,10 @@ calcuTest =
                         2.0 |> within (Expect.Absolute 0.1) (standardNormalV 180 x sd)
             , test "標準正規分布表をネットから取り寄せてそれをテスト" <|
                 \_ ->
-                    0.1578 |> within (Expect.Absolute 0.1) (sDNForDict 1.0)
+                    0.0062 |> within (Expect.Absolute 0.1) (sDNForDict 25 20 2)
+            , test "上方信頼限界と下方信頼限界" <|
+                \_ ->
+                    (191.56, 148.44)
+                        |> equal (confidenceLimit 170 11)
             ]
         ]
