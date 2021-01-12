@@ -14,6 +14,11 @@ module Stat exposing (..)
 import Dict exposing (Dict)
 import Html.Attributes exposing (list)
 import List exposing (length, map, sum)
+import Html exposing (i)
+import Dict exposing (foldl)
+import Dict exposing (foldr)
+import String exposing (toInt)
+import Round exposing (roundNum)
 
 
 
@@ -25,11 +30,15 @@ import List exposing (length, map, sum)
 -}
 average : List Float -> Float
 average list =
-    sum list / Basics.toFloat (length list)
+     if length list == 0 then
+        0
+     else
+        sum list / Basics.toFloat (length list)
 
 
 
-{-|偏差(deviation)
+{-| 偏差(deviation)
+    サンプリングしたデータをその平均で引く
 
     deviation [ 32, 27, 29, 34, 33 ]
 
@@ -49,8 +58,20 @@ deviation list =
 -}
 standardDeviation : List Float -> Float
 standardDeviation list =
-    sqrt (sum (map (\e -> e ^ 2) (deviation list)) / Basics.toFloat (length list))
+    sqrt (sum (map (\e -> e ^ 2) (deviation list)) / Basics.toFloat ((length list) - 1))
 
+
+{-| 変動係数
+    標準偏差を平均で割ると算出できる。
+    一つのリストで求められる
+
+    coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ] 
+
+    -- OUT 0.303
+-}
+coefficientOfVariation : List Float -> Float
+coefficientOfVariation sampleData =
+    (standardDeviation sampleData) / (average sampleData)
 
 
 {- シャープレシオ
@@ -207,13 +228,152 @@ x2Distribution x1 x2 =
 
 
 
-{-
-   -- 標本分散 自由度を求める関数とそこからカイ二乗分布を割り出す関数を何かしら実装する必要がある。
-   specimenDispersion: List Float -> Float -> Float
-   specimenDispersion data mu =
-       let
-           standard = standardDeviation data
-           dev = deviation data
-           v = sum (map (\e -> e ^ 2) dev)
-       in
+-- 標本分散 自由度を求める関数とそこからカイ二乗分布を割り出す関数を何かしら実装する必要がある。
+specimenDispersion: List Float -> Float -> Float
+specimenDispersion data mu =
+    Debug.todo "カイ二乗分布をうまく求める方法を理解する。"
+
+
+-- RANDOM 
+{-| 無作為抽出
 -}
+randomSampling: List (List Float) -> Int -> List Float
+randomSampling multidimensionArray sampleNumber =
+    Debug.todo "どうやって多次元配列から抜き出せばよいだろうか"
+
+
+---------------------------------------------- 後で分割するかもしれないが、まだまだファイルは小さいのでまとめて書く ----------------------------------------------
+-- 確率
+
+
+{-| biDistributionProbability
+    二項分布の確率関数
+
+    biDistributionProbability 0.5 3 0
+
+    OUT 0.125
+-}
+biDistributionProbability: Float -> Int -> Int -> Float 
+biDistributionProbability p n c =
+    (toFloat (combination n c) / 1) * (p ^ toFloat c) * ((1 - p) ^ toFloat (n-c))
+
+
+biDistributionRecursion:Float -> Int -> Int -> List Float
+biDistributionRecursion p n c =
+    case c of
+        0 -> (biDistributionProbability p n c) :: []
+
+        _ -> (biDistributionProbability p n c) :: biDistributionRecursion p n (c-1) 
+
+
+{-| biDistribution
+    二項分布、再帰で求めるその数をなんとかそれっぽくするため
+    ひっくり返します。
+    しかし奇数のときはひっくり返さないほうが良さそう？(要検証)
+
+    biDistribution 0.7 4
+
+    OUT [0.2401, 0.4116, 0.2646, 0.0756, 0.0081]
+
+    biDistribution 0.5 3 3
+
+    OUT [0.125, 0.375, 0.375, 0.125]
+-}
+biDistribution: Float -> Int -> List Float
+biDistribution p n =
+    List.reverse (List.map (\x -> roundNum n x) (biDistributionRecursion p n n))
+
+
+{-| poissonDistributionProbability
+    ポアソン分布の確率密度関数
+
+    poissonDistributionProbability 0.1, 4
+
+    OUT 7.15e-4
+-}
+poissonDistributionProbability:Float -> Int -> Int -> Float
+poissonDistributionProbability p n c =
+    let
+        nn = toFloat n
+        mu = p * nn
+        el = Basics.e ^ -mu
+    in
+        el * (mu ^ (toFloat c)) / toFloat (factorial c) 
+
+
+poissonDistributionRecursion:Float -> Int -> Int -> List Float
+poissonDistributionRecursion p n c =
+    case c of
+        0 -> (poissonDistributionProbability p n c) :: []
+
+        _ -> (poissonDistributionProbability p n c) :: (poissonDistributionRecursion p n (c-1))
+
+
+{-| poisson
+    再帰の都合上逆向きになるので逆さまにひっくり返す。
+
+    poisson 0.1 4
+
+    OUT [ 0.6703, 0.2681, 0.0536, 7.15e-3, 7.15e-4 ]
+-}
+poisson:Float -> Int -> List Float
+poisson p n =
+    List.reverse (List.map (\x -> roundNum 6 x) (poissonDistributionRecursion p n n))
+
+
+{-| standardNormalV
+    正規分布の標準化を求める
+    どんな正規分布もN（0， 1 ＾　2）の正規分布になれる。
+
+    standardNormalV 180 160 10
+
+    OUT 2.0
+-}
+standardNormalV: Float -> Float -> Float -> Float
+standardNormalV data x sd =
+    (data - x) / sd
+
+
+--------分布のための関数ここまで、--------------------------
+
+
+----------色々やってくれる優しい関数
+
+
+{-| factorial
+    階乗計算で再帰で実装する典型的な計算式です。
+
+    factorial 5
+
+    OUT 120
+-}
+factorial : Int -> Int
+factorial n =
+    case n of
+        0 -> 1
+
+        _ -> n * (factorial (n-1))
+
+
+{-| permutation
+    順列
+
+    permutation 4 2
+
+    OUT 12
+-}
+permutation : Int -> Int -> Int
+permutation n m =
+    (factorial n) // (factorial (n - m))
+
+
+{-| combination
+    組み合わせ
+
+    combination 10 3
+
+    OUT 120
+-}
+combination : Int -> Int -> Int
+combination n m =
+    (factorial n) // ((factorial (n - m)) * (factorial m))

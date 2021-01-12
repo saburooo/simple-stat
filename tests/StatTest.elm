@@ -3,8 +3,15 @@ module StatTest exposing (..)
 import Dict exposing (Dict)
 import Expect exposing (equal, equalDicts, equalLists, greaterThan, lessThan, within)
 import List
-import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution)
+import Round exposing (roundNum)
+import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, randomSampling, factorial, permutation,combination, biDistributionProbability, biDistribution)
+
 import Test exposing (Test, describe, skip, test, todo)
+import Fuzz exposing (list, float)
+import Test exposing (fuzz)
+import Stat exposing (coefficientOfVariation, standardNormalV)
+import Stat exposing (biDistributionProbability)
+import Stat exposing (poisson)
 
 
 calcuTest : Test
@@ -109,15 +116,50 @@ calcuTest =
                 \_ ->
                     0.28 |> within (Expect.Absolute 0.01) (x2Distribution 3 6)
 
-            {-
-               , skip "標本分散を求める" <|
-                   \_ ->
-                       let
-                           mu = 80
-                           butterFlyHeight = [76,85,83]
-                       in
-                           Dict.fromList [ ("min", 5.34), ("max", 231.80) ]
-                             |> equalDicts (specimenDispersion butterFlyHeight mu)
-            -}
+            , todo "標本分散を求める。"
+
+            -- 一つの多次元リストからランダムにちゃんと値を取り出せるか
+            , todo "無作為抽出"
+
+            , test "変動係数" <|
+                \_ ->
+                    0.303 |> within (Expect.Absolute 0.001) (coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ])
+            , test "階乗" <|
+                \_ ->
+                    equal 120 (factorial 5)
+            , test "順列" <|
+                \_ ->
+                    equal 720 (permutation 10 3)
+            , test "10人の中で3人を選ぶ組み合わせ" <|
+                \_ ->
+                    equal 120 (combination 10 3)
+            , test "二項分布の確率密度。" <|
+                \_ ->
+                    let
+                        threeCointhrowZero = 0.125
+                    in
+                        threeCointhrowZero |> within (Expect.Absolute 0.001) (biDistributionProbability 0.5 3 0)
+            , test "二項分布 <= 奇数編。" <|
+                \_ ->
+                    equalLists [0.125, 0.375, 0.375, 0.125] (biDistribution 0.5 3)
+            , test "二項分布 <= 偶数編" <|
+                \_ ->
+                    equalLists [0.2401, 0.4116, 0.2646, 0.0756, 0.0081] (List.reverse (biDistribution 0.7 4))
+            , test "二項分布 <= 奇数編、その2" <|
+                \_ ->
+                    equalLists [ 0.064, 0.288, 0.432, 0.216 ] (biDistribution 0.6 3)
+            , test "ポアソン分布" <|
+                \_ ->
+                    equalLists [ 0.67032, 0.268128, 0.053626, 7.15e-3, 7.15e-4 ] (poisson 0.1 4)
+            , test "標準化正規変数" <|
+                \_ ->
+                    let
+                        x = 160
+                        sd = 10
+                    in
+                        2.0 |> within (Expect.Absolute 0.1) (standardNormalV 180 x sd)
+            , test "標準正規分布表をネットから取り寄せてそれをテスト" <|
+                \_ ->
+                    0.1578 |> within (Expect.Absolute 0.1) (sDNForDict 1.0)
             ]
         ]
