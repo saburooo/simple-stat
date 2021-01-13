@@ -66,7 +66,7 @@ standardDeviation list =
     標準偏差を平均で割ると算出できる。
     一つのリストで求められる
 
-    coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ] 
+    coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ]
 
     -- OUT 0.303
 -}
@@ -235,7 +235,7 @@ specimenDispersion data mu =
     Debug.todo "カイ二乗分布をうまく求める方法を理解する。"
 
 
--- RANDOM 
+-- RANDOM
 {-| 無作為抽出
 -}
 randomSampling: List (List Float) -> Int -> List Float
@@ -254,7 +254,7 @@ randomSampling multidimensionArray sampleNumber =
 
     OUT 0.125
 -}
-biDistributionProbability: Float -> Int -> Int -> Float 
+biDistributionProbability: Float -> Int -> Int -> Float
 biDistributionProbability p n c =
     (toFloat (combination n c) / 1) * (p ^ toFloat c) * ((1 - p) ^ toFloat (n-c))
 
@@ -264,7 +264,7 @@ biDistributionRecursion p n c =
     case c of
         0 -> (biDistributionProbability p n c) :: []
 
-        _ -> (biDistributionProbability p n c) :: biDistributionRecursion p n (c-1) 
+        _ -> (biDistributionProbability p n c) :: biDistributionRecursion p n (c-1)
 
 
 {-| biDistribution
@@ -299,7 +299,7 @@ poissonDistributionProbability p n c =
         mu = p * nn
         el = Basics.e ^ -mu
     in
-        el * (mu ^ (toFloat c)) / toFloat (factorial c) 
+        el * (mu ^ (toFloat c)) / toFloat (factorial c)
 
 
 poissonDistributionRecursion:Float -> Int -> Int -> List Float
@@ -364,6 +364,20 @@ confidenceLimit x sigma =
         lower = -1.96 * sigma + x
     in
         Tuple.pair upper lower
+
+
+{-| popMearnD 母平均の推定
+    母平均を推定したいとき、標本の数によってどう計算するのかを変える。
+    popMearnD x s n
+
+    OUT (2434.87, 2665.13
+-}
+popMearnD: Float -> Float -> Float -> (Float, Float)
+popMearnD x s n =
+  let
+      degreeOfFreedom = tDistIntentionalLevelFivePer (n - 1)
+  in
+
 
 
 --------分布のための関数ここまで、--------------------------

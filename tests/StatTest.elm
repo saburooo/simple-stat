@@ -164,5 +164,14 @@ calcuTest =
                 \_ ->
                     (191.56, 148.44)
                         |> equal (confidenceLimit 170 11)
+            , test "母平均 μ の推定(σが道で、標本の数が少ない場合)" <|
+                \_ ->
+                    let
+                      n = 20
+                      x = 2550
+                      s = 246
+                    in
+                      (2434.87, 2665.13)
+                          |> equal (popMearnD x s n )
             ]
         ]
