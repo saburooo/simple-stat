@@ -10,7 +10,7 @@ import Test exposing (Test, describe, skip, test, todo)
 import Fuzz exposing (list, float)
 import Test exposing (fuzz)
 import Stat exposing (coefficientOfVariation, standardNormalV)
-import Stat exposing (poisson, sDNForDict, confidenceLimit)
+import Stat exposing (poisson, sDNForDict, confidenceLimit, popMearnD)
 
 
 calcuTest : Test
@@ -173,5 +173,14 @@ calcuTest =
                     in
                       (2434.87, 2665.13)
                           |> equal (popMearnD x s n )
+            , test "母平均 μ の推定(σが道で、標本の数が多い場合)" <|
+                \_ ->
+                    let
+                        n = 100
+                        x = 2550
+                        s = 246
+                    in
+                        (2501.78, 2598.22)
+                            |> equal (popMearnD x s n)
             ]
         ]
