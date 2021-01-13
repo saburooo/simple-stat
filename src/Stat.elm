@@ -19,6 +19,7 @@ import Dict exposing (foldl)
 import Dict exposing (foldr)
 import String exposing (toInt)
 import Round exposing (roundNum)
+import Data exposing (standardNormalDistoributionUpper)
 
 
 
@@ -332,6 +333,37 @@ poisson p n =
 standardNormalV: Float -> Float -> Float -> Float
 standardNormalV data x sd =
     (data - x) / sd
+
+
+{-| sDNForDict
+    Dictな標準正規分布表から数値を取り出す。
+    sDNForDict 25 20 2
+
+    OUT 0.0062
+    TODO:リストから該当する数値を取り出したいのだがうまいやり方が思いつかないのでしばらくこのままかな？
+    List.take {数値} からのtailで良さそうな気もする。
+-}
+sDNForDict: Float -> Float -> Float -> Float
+sDNForDict data x sd =
+    Maybe.withDefault 0 (List.head (Maybe.withDefault [] (Dict.get (standardNormalV data x sd) standardNormalDistoributionUpper)))
+
+
+{-| confidenceLimit
+    信頼限界
+    ２つのFloatを受け取ってFloat２つ入りのTupleを返す。
+    信頼係数を95%とするけど３段階に分けるようにしても面白いかもしれない。
+
+    confidenceLimit 170 11
+
+    OUT (191.56, 148.44)
+-}
+confidenceLimit: Float -> Float -> (Float, Float)
+confidenceLimit x sigma =
+    let
+        upper = 1.96 * sigma + x
+        lower = -1.96 * sigma + x
+    in
+        Tuple.pair upper lower
 
 
 --------分布のための関数ここまで、--------------------------
