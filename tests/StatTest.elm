@@ -10,7 +10,7 @@ import Test exposing (Test, describe, skip, test, todo)
 import Fuzz exposing (list, float)
 import Test exposing (fuzz)
 import Stat exposing (coefficientOfVariation, standardNormalV)
-import Stat exposing (poisson, sDNForDict, confidenceLimit, popMearnD)
+import Stat exposing (poisson, sDNForDict, confidenceLimit, popMeanD, chiSquare)
 
 
 calcuTest : Test
@@ -172,7 +172,7 @@ calcuTest =
                       s = 246
                     in
                       (2434.87, 2665.13)
-                          |> equal (popMearnD x s n )
+                          |> equal (popMeanD x s n )
             , test "母平均 μ の推定(σが道で、標本の数が多い場合)" <|
                 \_ ->
                     let
@@ -181,6 +181,17 @@ calcuTest =
                         s = 246
                     in
                         (2501.78, 2598.22)
-                            |> equal (popMearnD x s n)
+                            |> equal (popMeanD x s n)
+            , test "カイ二乗分布であるx2を求める、母平均と母標準偏差" <|
+                \_ ->
+                    2.0918 |> within (Expect.Absolute 0.001) (chiSquare [168, 141, 157, 151, 160] 155 14 )
+            , test "母標準偏差の推定" <|
+                \_ ->
+                    let
+                        s = 8
+                        n = 10
+                        cc = 95
+                    in
+                        (14.61, 5.51) |> equal (popStandardD s n cc)
             ]
         ]

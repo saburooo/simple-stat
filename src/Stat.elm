@@ -17,10 +17,10 @@ import Html exposing (i)
 import Html.Attributes exposing (list)
 import List exposing (length, map, sum)
 import Round exposing (roundNum)
-import String exposing (toInt)
 
 
 {-| 算術平均、Float入Listを受け取ってFloatを返す
+import Main exposing (Status(..))
 
     average [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
 
@@ -56,8 +56,6 @@ deviation list =
 
    greaterThan 3.03
 -}
-
-
 standardDeviation : List Float -> Float
 standardDeviation list =
     sqrt (sum (map (\e -> e ^ 2) (deviation list)) / Basics.toFloat (length list - 1))
@@ -223,14 +221,12 @@ pickUpDegreeOfFreedom x =
 
 
 {- カイ二乗分布でおそらく一番実装が大変なことになる。
-   正確にはカイ二乗分布から2つ値を取り出し、引き算を行う関数
+   正確にはカイ二乗分布の表から2つ値を取り出し、引き算を行う関数
 
        x2Distribution 3 6
 
        -- OUT 0.28
 -}
-
-
 x2Distribution : Int -> Int -> Float
 x2Distribution x1 x2 =
     let
@@ -242,6 +238,13 @@ x2Distribution x1 x2 =
     in
     z1 - z2
 
+
+{-| chiSquare
+    カイ二乗分布を求める？関数
+-}
+chiSquare:List Float -> Float -> Float -> Float
+chiSquare sample mu sigma =
+    List.sum (List.map (\s -> (s - mu) ^ 2) sample) / (sigma ^ 2)
 
 
 -- 標本分散 自由度を求める関数とそこからカイ二乗分布を割り出す関数を何かしら実装する必要がある。
@@ -375,7 +378,6 @@ Dictな標準正規分布表から数値を取り出す。
 sDNForDict 25 20 2
 
     OUT 0.0062
-    TODO:リストから該当する数値を取り出したいのだがうまいやり方が思いつかないのでしばらくこのままかな？
 
 -}
 sDNForDict : Float -> Float -> Float -> Float
@@ -405,15 +407,15 @@ confidenceLimit x sigma =
     Tuple.pair upper lower
 
 
-{-| popMearnD 母平均の推定
+{-| popMeanD 母平均の推定
 母平均を推定したいとき、標本の数によってどう計算するのかを変える。
-popMearnD x s n
+    popMeanD x s n
 
     OUT ( 2434.87, 2665.13 )
 
 -}
-popMearnD : Float -> Float -> Float -> ( Float, Float )
-popMearnD x s n =
+popMeanD : Float -> Float -> Float -> ( Float, Float )
+popMeanD x s n =
     let
         degreeOfFreedom =
             n - 1
@@ -429,6 +431,16 @@ popMearnD x s n =
     in
     Tuple.pair lower upper
 
+
+{-| popStandardD
+    母標準偏差の推定
+    popStandardD 8 10 95
+
+    OUT (14.61, 5.51)
+-}
+popStandardD:Float -> Float -> Float -> (Float, Float)
+popStandardD s n cc =
+    Debug.todo "αの信頼限界をそれぞれ求める。"
 
 
 --------分布のための関数ここまで、--------------------------
@@ -477,3 +489,4 @@ permutation n m =
 combination : Int -> Int -> Int
 combination n m =
     factorial n // (factorial (n - m) * factorial m)
+
