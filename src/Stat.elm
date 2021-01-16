@@ -11,7 +11,7 @@ module Stat exposing (..)
    @docs deviation
 -}
 
-import Data exposing (standardNormalDistoributionUpper, tDistIntentionalLevelFivePer)
+import Data exposing (standardNormalDistoributionUpper, tDistIntentionalLevelFivePer, chiGet)
 import Dict exposing (Dict, foldl, foldr)
 import Html exposing (i)
 import Html.Attributes exposing (list)
@@ -19,6 +19,7 @@ import List exposing (length, map, sum)
 import Round exposing (roundNum)
 
 
+import Data exposing (chiGet)
 {-| 算術平均、Float入Listを受け取ってFloatを返す
 import Main exposing (Status(..))
 
@@ -438,9 +439,18 @@ popMeanD x s n =
 
     OUT (14.61, 5.51)
 -}
-popStandardD:Float -> Float -> Float -> (Float, Float)
+popStandardD:Float -> Int -> Float -> (Float, Float)
 popStandardD s n cc =
-    Debug.todo "αの信頼限界をそれぞれ求める。"
+    let
+        sSquare = s ^ 2
+        m = n - 1
+        minMin = roundNum 4 (1 - cc)
+        chiMax = chiGet m cc
+        chiMin = chiGet m minMin
+        resultOne = roundNum 3 (sqrt ((toFloat m) * sSquare / chiMax))
+        resultTwo = roundNum 3 (sqrt ((toFloat m) * sSquare / chiMin))
+    in
+        Tuple.pair resultOne resultTwo
 
 
 --------分布のための関数ここまで、--------------------------

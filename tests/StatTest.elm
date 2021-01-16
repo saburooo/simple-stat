@@ -10,7 +10,7 @@ import Test exposing (Test, describe, skip, test, todo)
 import Fuzz exposing (list, float)
 import Test exposing (fuzz)
 import Stat exposing (coefficientOfVariation, standardNormalV)
-import Stat exposing (poisson, sDNForDict, confidenceLimit, popMeanD, chiSquare)
+import Stat exposing (poisson, sDNForDict, confidenceLimit, popMeanD, chiSquare, popStandardD)
 
 
 calcuTest : Test
@@ -190,8 +190,8 @@ calcuTest =
                     let
                         s = 8
                         n = 10
-                        cc = 95
+                        cc = 0.975
                     in
-                        (14.61, 5.51) |> equal (popStandardD s n cc)
+                        (14.605, 5.503) |> equal (popStandardD s n cc)
             ]
         ]
