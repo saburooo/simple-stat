@@ -10,7 +10,7 @@ import Test exposing (Test, describe, skip, test, todo)
 import Fuzz exposing (list, float)
 import Test exposing (fuzz)
 import Stat exposing (coefficientOfVariation, standardNormalV)
-import Stat exposing (poisson, sDNForDict, confidenceLimit, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha)
+import Stat exposing (poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha)
 
 
 calcuTest : Test
@@ -233,11 +233,19 @@ hypothesisTest =
 correlationTest:Test
 correlationTest =
     describe "相関分析と回帰分析のテスト"
-        [ test "単純相関のテスト" <|
+        [ test "単純相関のテスト（Raw dataのケース）" <|
             \_ ->
                 let
                     xi = [580, 600, 470, 450, 450, 480]
                     yi = [50.1, 51.2, 46.1, 46.0, 47.0, 48.5]
                 in
-                    0.9373 |> within (Expect.Absolute 0.00001) (classifiedData xi yi)
+                    0.9373 |> within (Expect.Absolute 0.00001) (rawData xi yi)
+        , test "単純相関係数の計算（Classified dataのケース）" <|
+            \_ ->
+                let
+                    xi = [0.0, 0.5, 1.0, 1.5, 2.0, 2.5]
+                    yi = [182, 168, 151, 130, 124, 120]
+                    f = [2, 3, 4, 6, 5, 2]
+                in
+                    -0.9540 |> within (Expect.Absolute 0.0001) (classifiedData xi yi f)
         ]

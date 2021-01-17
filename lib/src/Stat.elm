@@ -539,11 +539,15 @@ hypothesisNotAlpha mu n xi s a =
         if xi > xii then True else False
 
 
-{-| classifiedData 
+{-| rawData 
     2つのリストを受け取ってr2とrに相当する値を返す。
+
+    rawData [580, 600, 470, 450, 450, 480] [50.1, 51.2, 46.1, 46.0, 47.0, 48.5]
+
+    OUT 0.9373
 -}
-classifiedData:List Float -> List Float -> Float
-classifiedData xi yi =
+rawData:List Float -> List Float -> Float
+rawData xi yi =
     let
         sigmaXY = List.sum (List.map2 (*) xi yi)
         averageXi = average xi
@@ -553,3 +557,12 @@ classifiedData xi yi =
         yjj = (List.sum (List.map (\y -> y ^ 2) yi)) - (toFloat (length yi)) * averageYi ^ 2
     in
         roundNum 4 (sqrt (i / (xjj * yjj)))
+
+
+classifiedData:List Float -> List Float -> List Float -> Float
+classifiedData xi yi f =
+    let
+        averageXi = 1/(List.sum f) * (List.sum xi)*(List.sum f)
+        averageYi = 1/(List.sum f) * (List.sum yi)*(List.sum f)
+    in
+        Debug.todo "Classified Dataの計算重視"
