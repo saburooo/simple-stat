@@ -10,7 +10,7 @@ import Test exposing (Test, describe, skip, test, todo)
 import Fuzz exposing (list, float)
 import Test exposing (fuzz)
 import Stat exposing (coefficientOfVariation, standardNormalV)
-import Stat exposing (poisson, sDNForDict, confidenceLimit, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha)
+import Stat exposing (poisson, sDNForDict, confidenceLimit, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha)
 
 
 calcuTest : Test
@@ -224,4 +224,20 @@ hypothesisTest =
         , test "母標準偏差αがわからん場合の仮説検定(標本が多い場合）" <|
             \_ ->
                 Expect.true "優位に長い" (hypothesisNotAlpha 180 100 181 5 0.05)
+        ]
+
+
+{-| 
+相関分析と回帰分析のテスト
+-}
+correlationTest:Test
+correlationTest =
+    describe "相関分析と回帰分析のテスト"
+        [ test "単純相関のテスト" <|
+            \_ ->
+                let
+                    xi = [580, 600, 470, 450, 450, 480]
+                    yi = [50.1, 51.2, 46.1, 46.0, 47.0, 48.5]
+                in
+                    0.9373 |> within (Expect.Absolute 0.00001) (classifiedData xi yi)
         ]

@@ -20,8 +20,6 @@ import List exposing (length, map, sum)
 import Round exposing (roundNum)
 
 import Data exposing (chiGet)
-import Expect exposing (true)
-import Expect exposing (false)
 
 {-| 算術平均、Float入Listを受け取ってFloatを返す
 import Main exposing (Status(..))
@@ -540,3 +538,18 @@ hypothesisNotAlpha mu n xi s a =
     in
         if xi > xii then True else False
 
+
+{-| classifiedData 
+    2つのリストを受け取ってr2とrに相当する値を返す。
+-}
+classifiedData:List Float -> List Float -> Float
+classifiedData xi yi =
+    let
+        sigmaXY = List.sum (List.map2 (*) xi yi)
+        averageXi = average xi
+        averageYi = average yi
+        i = (sigmaXY - (toFloat (length xi))*averageXi*averageYi) ^ 2
+        xjj = (List.sum (List.map (\x -> x ^ 2) xi)) - (toFloat (length xi)) * averageXi ^ 2
+        yjj = (List.sum (List.map (\y -> y ^ 2) yi)) - (toFloat (length yi)) * averageYi ^ 2
+    in
+        roundNum 4 (sqrt (i / (xjj * yjj)))
