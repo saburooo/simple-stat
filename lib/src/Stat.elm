@@ -1,4 +1,5 @@
 module Stat exposing (..)
+-- TODO 実際に使う関数を厳選する。
 
 {- モジュールを公開する気でその書き方も練習しよう
 
@@ -18,8 +19,10 @@ import Html.Attributes exposing (list)
 import List exposing (length, map, sum)
 import Round exposing (roundNum)
 
-
 import Data exposing (chiGet)
+import Expect exposing (true)
+import Expect exposing (false)
+
 {-| 算術平均、Float入Listを受け取ってFloatを返す
 import Main exposing (Status(..))
 
@@ -435,9 +438,10 @@ popMeanD x s n =
 
 {-| popStandardD
     母標準偏差の推定
-    popStandardD 8 10 95
+    
+    popStandardD 8 10 0.975
 
-    OUT (14.61, 5.51)
+    OUT (14.605, 5.503)
 -}
 popStandardD:Float -> Int -> Float -> (Float, Float)
 popStandardD s n cc =
@@ -499,4 +503,40 @@ permutation n m =
 combination : Int -> Int -> Int
 combination n m =
     factorial n // (factorial (n - m) * factorial m)
+
+
+------色々やってくれる優しい関数ここまで
+
+
+{-| hypothesisForAlpha
+    仮説検定、初めてのbooleanを返す関数
+    例題：「新製品の寿命は１８０時間より長い（μ＞１８０）」
+    という仮説を立て、
+    標本の数１００個の平均を調べたら１９８であった。
+    この仮説はTrueですか？Falseですか？
+    hypothesisForAlpha 180 20 100 198
+
+    OUT True
+-}
+hypothesisForAlpha : Float -> Float -> Int -> Float -> Bool
+hypothesisForAlpha mu sigma n aveRage = 
+    let
+        cz = 1.645
+        -- 棄却域
+        criticalRegion = mu + cz * sigma / (sqrt (toFloat n))
+    in
+        if aveRage > criticalRegion then Basics.True else Basics.False
+
+
+{-| hypothesisNotAlpha
+    母標準偏差αがわからん場合の仮説検定
+    例題:標本が20で標本平均が
+-}
+hypothesisNotAlpha:Float -> Int -> Float -> Float -> Float -> Bool
+hypothesisNotAlpha mu n xi s a =
+    let
+        ct = tDistIntentionalLevelFivePer (n - 1)
+        xii = mu + ct * s / (sqrt (toFloat n))
+    in
+        if xi > xii then True else False
 

@@ -1,4 +1,4 @@
-module Data exposing (standardNormalDistoributionUpper, tDistIntentionalLevelFivePer, chiGet)
+module Data exposing (..)
 
 import Dict exposing (Dict)
 

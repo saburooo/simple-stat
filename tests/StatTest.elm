@@ -10,7 +10,7 @@ import Test exposing (Test, describe, skip, test, todo)
 import Fuzz exposing (list, float)
 import Test exposing (fuzz)
 import Stat exposing (coefficientOfVariation, standardNormalV)
-import Stat exposing (poisson, sDNForDict, confidenceLimit, popMeanD, chiSquare, popStandardD)
+import Stat exposing (poisson, sDNForDict, confidenceLimit, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha)
 
 
 calcuTest : Test
@@ -193,5 +193,35 @@ calcuTest =
                         cc = 0.975
                     in
                         (14.605, 5.503) |> equal (popStandardD s n cc)
+          
+                    
             ]
+        ]
+
+
+
+{-
+流石に長くなってきたというか分割したほうがいいので仮説検定のテストを別に建てる。
+-}
+hypothesisTest : Test
+hypothesisTest =
+    describe "仮説検定のテスト"
+        [ test "母標準偏差αが既知の場合の仮説検定" <|
+            \_ ->
+                let
+                    mu = 180
+                    sigma = 20
+                    n = 100
+                    aveRage = 198
+                    a = 0.05
+                    -- TODO 有意水準の臨界値を求める関数を求める。
+                    cz = 1.645
+                in
+                    Expect.true "従来より長くなった" (hypothesisForAlpha mu sigma n aveRage)
+        , test "母標準偏差αがわからん場合の仮説検定(標本がすくない場合）" <|
+            \_ ->
+                Expect.true "優位に長い" (hypothesisNotAlpha 180 20 198 15 0.05)
+        , test "母標準偏差αがわからん場合の仮説検定(標本が多い場合）" <|
+            \_ ->
+                Expect.true "優位に長い" (hypothesisNotAlpha 180 100 181 5 0.05)
         ]
