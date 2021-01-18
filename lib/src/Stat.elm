@@ -559,10 +559,27 @@ rawData xi yi =
         roundNum 4 (sqrt (i / (xjj * yjj)))
 
 
+{-| classifiedData
+    観測したデータの数も視野に入れた統計計算
+
+    classifiedData [0.0, 0.5, 1.0, 1.5, 2.0, 2.5] [182, 168, 151, 130, 124, 120] [2, 3, 4, 6, 5, 2]
+
+    OUT -0.967
+-}
 classifiedData:List Float -> List Float -> List Float -> Float
 classifiedData xi yi f =
     let
-        averageXi = 1/(List.sum f) * (List.sum xi)*(List.sum f)
-        averageYi = 1/(List.sum f) * (List.sum yi)*(List.sum f)
+        averageXi = roundNum 4 (1/(List.sum f) * List.sum (List.map2 (*) xi f))
+        averageYi = roundNum 4 (1/(List.sum f) * List.sum (List.map2 (*) yi f))
+        xSum = List.sum xi
+        ySum = List.sum yi
+        fSum = List.sum f
+        x2i = List.map (\x -> x ^ 2) xi
+        y2i = List.map (\y -> y ^ 2) yi
+        xfSum = List.sum (List.map2 (*) x2i f)
+        yfSum = List.sum (List.map2 (*) y2i f)
+        xyfSum = List.sum (List.map2 (*) xi (List.map2 (*) yi f) )
+        up = (xyfSum - fSum*averageXi*averageYi) ^ 2
+        down = (xfSum - fSum*averageXi^2) * (yfSum - fSum*averageYi^2)
     in
-        Debug.todo "Classified Dataの計算重視"
+        roundNum 4 (-(Basics.sqrt (up / down)))

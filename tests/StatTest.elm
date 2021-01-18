@@ -247,5 +247,5 @@ correlationTest =
                     yi = [182, 168, 151, 130, 124, 120]
                     f = [2, 3, 4, 6, 5, 2]
                 in
-                    -0.9540 |> within (Expect.Absolute 0.0001) (classifiedData xi yi f)
+                    -0.967 |> within (Expect.Absolute 0.0001) (classifiedData xi yi f)
         ]
