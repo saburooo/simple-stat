@@ -566,7 +566,7 @@ rawData xi yi =
 
     OUT -0.967
 -}
-classifiedData:List Float -> List Float -> List Float -> Float
+classifiedData:List Float -> List Float -> List Float -> Dict String Float
 classifiedData xi yi f =
     let
         averageXi = roundNum 4 (1/(List.sum f) * List.sum (List.map2 (*) xi f))
@@ -582,4 +582,47 @@ classifiedData xi yi f =
         up = (xyfSum - fSum*averageXi*averageYi) ^ 2
         down = (xfSum - fSum*averageXi^2) * (yfSum - fSum*averageYi^2)
     in
-        roundNum 4 (-(Basics.sqrt (up / down)))
+        Dict.fromList [ ( "r2", roundNum 4 (-(Basics.sqrt (up / down))) ), ( "r", roundNum 4 (up / down ) ) ]
+
+
+{-| olsRawData
+    OLS(最小2乗法)の関数
+
+    2つのList Float を受け取って Dict String Float を返す。
+    olsRawData [5, 10, 15, 20, 25, 30] [13, 14, 18, 19, 22, 26]
+    -- 少数4桁ほどのほうが扱いやすそう(未検証)
+
+    OUT [ ( "b", 0.5143 ), ( "a", 9.67 ), ( "r2", 0.9697 ), ( "r", 0.9847 )]
+
+-}
+olsRawData:List Float -> List Float -> Dict String Float
+olsRawData xi yi = 
+    let
+        xiAverage = average xi
+        yiAverage = average yi
+        n = toFloat (List.length xi)
+        devXi = deviation xi 
+        devYi = deviation yi
+        momentXiYi = List.sum (List.map2 (*) devXi devYi)
+        -- 勾配
+        b = roundNum 4 (momentXiYi / List.sum (List.map (\x -> x ^ 2) (deviation xi)))
+        -- 定数項
+        a = roundNum 2 (yiAverage - b * xiAverage)
+        rSquare = roundNum 4 ((momentXiYi ^ 2) / (List.sum (List.map (\x -> x ^ 2) devXi) * List.sum (List.map (\x -> x ^ 2) devYi)))
+    in
+        Dict.fromList [ ( "b", b ), ( "a", a ), ( "r2", rSquare  ), ( "r", roundNum 4 (sqrt rSquare) ) ]
+
+
+olsClassifiedData:List Float -> List Float -> List Float -> Dict String Float
+olsClassifiedData xi yi f =
+    let
+        momentXiYi = List.sum (List.map2 (*) f (List.map2 (*) xi yi)) - List.sum (List.map2 (*) f (List.map2 (*) (deviation xi) (deviation yi))) |> roundNum 2
+        momentYi2 = List.sum (List.map2 (*) f (List.map (\y -> y ^ 2) yi)) - (List.sum f) * (average yi) ^ 2 |> roundNum 2
+        momentXi2 = List.sum (List.map2 (*) f (List.map (\x -> x ^ 2) xi)) - (List.sum f) * (average xi) ^ 2 |> roundNum 2
+    in
+        Dict.fromList [("D", Debug.log "momentXiYi" momentXiYi), ("D2", Debug.log "momentYi2" momentYi2), ("D3", Debug.log "momentXi2" momentXi2)]
+
+
+regressionAnalysisRaw:List Float -> List Float -> Dict String Float
+regressionAnalysisRaw xi yi =
+    Debug.todo "回帰係数・相関係数の計測と検定を行う"

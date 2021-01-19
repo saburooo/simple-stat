@@ -10,7 +10,7 @@ import Test exposing (Test, describe, skip, test, todo)
 import Fuzz exposing (list, float)
 import Test exposing (fuzz)
 import Stat exposing (coefficientOfVariation, standardNormalV)
-import Stat exposing (poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha)
+import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData )
 
 
 calcuTest : Test
@@ -247,5 +247,31 @@ correlationTest =
                     yi = [182, 168, 151, 130, 124, 120]
                     f = [2, 3, 4, 6, 5, 2]
                 in
-                    -0.967 |> within (Expect.Absolute 0.0001) (classifiedData xi yi f)
+                    Dict.fromList [ ("r2", -0.967 ), ("r", 0.935)]
+                        |> equalDicts (classifiedData xi yi f)
+        , test "単純回帰のテスト(OLS) Raw Data" <|
+            \_ ->
+                let
+                    xi = [5, 10, 15, 20, 25, 30]
+                    yi = [13, 14, 18, 19, 22, 26]
+                in
+                    Dict.fromList [ ( "b", 0.5143 ), ( "a", 9.67 ), ( "r2", 0.9697 ), ( "r", 0.9847 )]
+                        |> Expect.equalDicts (olsRawData xi yi)
+        , test "Classified data の OLS" <|
+            \_ ->
+                let
+                    xi = [5, 10, 15, 20, 25, 30]
+                    yi = [13, 14, 18, 19, 22, 26]
+                    f = [2, 3, 4, 6, 3, 2]
+                in
+                    Dict.fromList [("r2",0.9571),("r", 0.9783),("a",9.6363),("b",0.5050)]
+                        |> equalDicts (olsClassifiedData xi yi f)
+        , test "回帰係数・相関係数の計測と検定(Raw Data のケース)" <|
+            \_ ->
+                let
+                    xi = [ 10, 20, 30, 40, 50 ]
+                    yi = [ 16, 19, 28, 36, 42 ]
+                in
+                    Dict.fromList [ ( "a", 7.5 ), ( "b", 0.69 ), ( "ta", 4.20 ), ( "tb", 12.80), ( "r", 0.9910 )]
+                        |> equalDicts ( regressionAnalysisRaw xi yi)
         ]
