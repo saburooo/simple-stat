@@ -14,7 +14,6 @@ module Stat exposing (..)
 
 import Data exposing (standardNormalDistoributionUpper, tDistIntentionalLevelFivePer, chiGet)
 import Dict exposing (Dict, foldl, foldr)
-import Html exposing (i)
 import Html.Attributes exposing (list)
 import List exposing (length, map, sum)
 import Round exposing (roundNum)
@@ -436,7 +435,7 @@ popMeanD x s n =
 
 {-| popStandardD
     母標準偏差の推定
-    
+
     popStandardD 8 10 0.975
 
     OUT (14.605, 5.503)
@@ -517,7 +516,7 @@ combination n m =
     OUT True
 -}
 hypothesisForAlpha : Float -> Float -> Int -> Float -> Bool
-hypothesisForAlpha mu sigma n aveRage = 
+hypothesisForAlpha mu sigma n aveRage =
     let
         cz = 1.645
         -- 棄却域
@@ -539,7 +538,7 @@ hypothesisNotAlpha mu n xi s a =
         if xi > xii then True else False
 
 
-{-| rawData 
+{-| rawData
     2つのリストを受け取ってr2とrに相当する値を返す。
 
     rawData [580, 600, 470, 450, 450, 480] [50.1, 51.2, 46.1, 46.0, 47.0, 48.5]
@@ -596,12 +595,12 @@ classifiedData xi yi f =
 
 -}
 olsRawData:List Float -> List Float -> Dict String Float
-olsRawData xi yi = 
+olsRawData xi yi =
     let
         xiAverage = average xi
         yiAverage = average yi
         n = toFloat (List.length xi)
-        devXi = deviation xi 
+        devXi = deviation xi
         devYi = deviation yi
         momentXiYi = List.sum (List.map2 (*) devXi devYi)
         -- 勾配
@@ -613,12 +612,22 @@ olsRawData xi yi =
         Dict.fromList [ ( "b", b ), ( "a", a ), ( "r2", rSquare  ), ( "r", roundNum 4 (sqrt rSquare) ) ]
 
 
+{-| olsClassifiedData
+
+    OLS(最小2乗法)の関数のClassified data 版
+
+    2つのList Float を受け取って Dict String Float を返す。
+    olsClassifiedData [5, 10, 15, 20, 25, 30] [13, 14, 18, 19, 22, 26]
+    -- 少数4桁ほどのほうが扱いやすそう(未検証)
+-}
 olsClassifiedData:List Float -> List Float -> List Float -> Dict String Float
 olsClassifiedData xi yi f =
     let
-        momentXiYi = List.sum (List.map2 (*) f (List.map2 (*) xi yi)) - List.sum (List.map2 (*) f (List.map2 (*) (deviation xi) (deviation yi))) |> roundNum 2
-        momentYi2 = List.sum (List.map2 (*) f (List.map (\y -> y ^ 2) yi)) - (List.sum f) * (average yi) ^ 2 |> roundNum 2
-        momentXi2 = List.sum (List.map2 (*) f (List.map (\x -> x ^ 2) xi)) - (List.sum f) * (average xi) ^ 2 |> roundNum 2
+        averageXi = (1/(List.sum f) * List.sum (List.map2 (*) xi f)) |> roundNum 4
+        averageYi = (1/(List.sum f) * List.sum (List.map2 (*) yi f)) |> roundNum 4
+        momentXiYi = List.sum (List.map2 (*) f (List.map2 (*) xi yi)) - ((List.sum f) * averageXi * averageYi) |> roundNum 2
+        momentXi2 = List.sum (List.map2 (*) f (List.map (\x -> x ^ 2) xi)) - (List.sum f) * averageXi ^ 2 |> roundNum 2
+        momentYi2 = List.sum (List.map2 (*) f (List.map (\y -> y ^ 2) yi)) - (List.sum f) * averageYi ^ 2 |> roundNum 2
     in
         Dict.fromList [("D", Debug.log "momentXiYi" momentXiYi), ("D2", Debug.log "momentYi2" momentYi2), ("D3", Debug.log "momentXi2" momentXi2)]
 
