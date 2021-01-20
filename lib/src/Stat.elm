@@ -763,7 +763,6 @@ regressionAnalysisRaw xi yi =
         ols = olsRawData xi yi
         clineB = Maybe.withDefault 0 <| Dict.get "b" ols
         constA = Maybe.withDefault 0 <| Dict.get "a" ols
-        rSquare = Maybe.withDefault 0 <| Dict.get "r2" ols
         r = Maybe.withDefault 0 <| Dict.get "r" ols
         -- 理論値 ^Y = a + bXi
         theoreticalValue = List.map (\x -> constA + clineB * x) xi
@@ -777,7 +776,3 @@ regressionAnalysisRaw xi yi =
     in
         Dict.fromList [ ( "b", clineB ), ( "a", constA ), ("r", r ), ("ta", ta), ("tb", tb)]
     
-
-
--- TODO: 有意性検定を行うために何％有意水準を取り出す関数を実装する。
-

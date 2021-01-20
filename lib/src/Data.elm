@@ -1,6 +1,7 @@
 module Data exposing (..)
 
 import Dict exposing (Dict)
+import Browser.Navigation exposing (Key)
 
 
 {-| standardNormalDistoributionUpper
@@ -256,3 +257,41 @@ chiGet n cc =
         pickUp = pickUpChi n
     in
         Maybe.withDefault 1 (Dict.get cc pickUp)
+
+
+pickUpSignificance:Int -> Basics.Float -> Basics.Float
+pickUpSignificance key v =
+    let
+        table = Dict.fromList [
+            (1, (Dict.fromList [(0.05, 0.996917),(0.01, 0.999877)])),
+            (2, (Dict.fromList [(0.05, 0.950000),(0.01, 0.990000)])),
+            (3, (Dict.fromList [(0.05, 0.878339),(0.01, 0.958735)])),
+            (4, (Dict.fromList [(0.05, 0.811401),(0.01, 0.917200)])),
+            (5, (Dict.fromList [(0.05, 0.754492),(0.01, 0.874526)])),
+            (6, (Dict.fromList [(0.05, 0.706734),(0.01, 0.834342)])),
+            (7, (Dict.fromList [(0.05, 0.666384),(0.01, 0.797681)])),
+            (8, (Dict.fromList [(0.05, 0.631897),(0.01, 0.764592)])),
+            (9, (Dict.fromList [(0.05, 0.602069),(0.01, 0.734786)])),
+            (10, (Dict.fromList [(0.05, 0.575983),(0.01, 0.707888)])),
+            (11, (Dict.fromList [(0.05, 0.552943),(0.01, 0.683528)])),
+            (12, (Dict.fromList [(0.05, 0.532413),(0.01, 0.661376)])),
+            (13, (Dict.fromList [(0.05, 0.513977),(0.01, 0.641145)])),
+            (14, (Dict.fromList [(0.05, 0.497309),(0.01, 0.622591)])),
+            (15, (Dict.fromList [(0.05, 0.482146),(0.01, 0.605506)])),
+            (16, (Dict.fromList [(0.05, 0.468277),(0.01, 0.589714)])),
+            (17, (Dict.fromList [(0.05, 0.455531),(0.01, 0.575067)])),
+            (18, (Dict.fromList [(0.05, 0.443763),(0.01, 0.561435)])),
+            (19, (Dict.fromList [(0.05, 0.432858),(0.01, 0.548711)])),
+            (20, (Dict.fromList [(0.05, 0.422714),(0.01, 0.536800)])),
+            (21, (Dict.fromList [(0.05, 0.413247),(0.01, 0.525620)])),
+            (22, (Dict.fromList [(0.05, 0.404386),(0.01, 0.515101)])),
+            (23, (Dict.fromList [(0.05, 0.396070),(0.01, 0.505182)])),
+            (24, (Dict.fromList [(0.05, 0.388244),(0.01, 0.495808)])),
+            (25, (Dict.fromList [(0.05, 0.380863),(0.01, 0.486932)])),
+            (26, (Dict.fromList [(0.05, 0.373886),(0.01, 0.478511)])),
+            (27, (Dict.fromList [(0.05, 0.367278),(0.01, 0.470509)])),
+            (28, (Dict.fromList [(0.05, 0.361007),(0.01, 0.462892)]))
+            ]
+        tList = Maybe.withDefault (Dict.fromList [(0.05, 0.361007),(0.01, 0.462892)]) (Dict.get key table)
+        in
+            Maybe.withDefault 0 (Dict.get v tList)

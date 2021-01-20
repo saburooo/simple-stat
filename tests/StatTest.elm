@@ -1,14 +1,11 @@
 module StatTest exposing (..)
 
 import Dict exposing (Dict)
-import Expect exposing (equal, equalDicts, equalLists, greaterThan, lessThan, within)
+import Expect exposing (equal, equalDicts, equalLists, greaterThan, within)
 import List
-import Round exposing (roundNum)
-import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, randomSampling, factorial, permutation,combination, biDistributionProbability, biDistribution)
+import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, factorial, permutation,combination, biDistributionProbability, biDistribution)
 
-import Test exposing (Test, describe, skip, test, todo)
-import Fuzz exposing (list, float)
-import Test exposing (fuzz)
+import Test exposing (Test, describe, test, todo)
 import Stat exposing (coefficientOfVariation, standardNormalV)
 import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData )
 

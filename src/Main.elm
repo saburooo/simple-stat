@@ -11,7 +11,6 @@
 
 module Main exposing (..)
 
-import Stat as Stat
 
 
 -- MAIN
