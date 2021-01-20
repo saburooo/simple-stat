@@ -1,6 +1,6 @@
 module Stat exposing (..)
--- TODO 実際に使う関数を厳選する。
 
+-- TODO 実際に使う関数を厳選する。
 {- モジュールを公開する気でその書き方も練習しよう
 
    TODO 度数と相対度数、累積度数など基本的なものを求める関数が必要だ
@@ -12,13 +12,13 @@ module Stat exposing (..)
    @docs deviation
 -}
 
-import Data exposing (standardNormalDistoributionUpper, tDistIntentionalLevelFivePer, chiGet)
+import Data exposing (chiGet, standardNormalDistoributionUpper, tDistIntentionalLevelFivePer)
 import Dict exposing (Dict, foldl, foldr)
 import Html.Attributes exposing (list)
 import List exposing (length, map, sum)
 import Round exposing (roundNum)
+import Fuzz exposing (constant)
 
-import Data exposing (chiGet)
 
 {-| 算術平均、Float入Listを受け取ってFloatを返す
 import Main exposing (Status(..))
@@ -35,6 +35,19 @@ average list =
 
     else
         sum list / Basics.toFloat (length list)
+
+
+{-| gigaAverage
+List Floatを２つ受け取って一つのFloatを返す。
+
+    gigaAverage [ 5, 10, 15, 20, 25, 30 ] [ 2, 3, 4, 6, 3, 2 ]
+
+    OUT 17.75
+
+-}
+gigaAverage : List Float -> List Float -> Float
+gigaAverage i f =
+    (1 / List.sum f * List.sum (List.map2 (*) i f)) |> roundNum 4
 
 
 {-| 偏差(deviation)
@@ -57,6 +70,8 @@ deviation list =
 
    greaterThan 3.03
 -}
+
+
 standardDeviation : List Float -> Float
 standardDeviation list =
     sqrt (sum (map (\e -> e ^ 2) (deviation list)) / Basics.toFloat (length list - 1))
@@ -228,6 +243,8 @@ pickUpDegreeOfFreedom x =
 
        -- OUT 0.28
 -}
+
+
 x2Distribution : Int -> Int -> Float
 x2Distribution x1 x2 =
     let
@@ -241,11 +258,12 @@ x2Distribution x1 x2 =
 
 
 {-| chiSquare
-    カイ二乗分布を求める？関数
+カイ二乗分布を求める？関数
 -}
-chiSquare:List Float -> Float -> Float -> Float
+chiSquare : List Float -> Float -> Float -> Float
 chiSquare sample mu sigma =
     List.sum (List.map (\s -> (s - mu) ^ 2) sample) / (sigma ^ 2)
+
 
 
 -- 標本分散 自由度を求める関数とそこからカイ二乗分布を割り出す関数を何かしら実装する必要がある。
@@ -410,7 +428,7 @@ confidenceLimit x sigma =
 
 {-| popMeanD 母平均の推定
 母平均を推定したいとき、標本の数によってどう計算するのかを変える。
-    popMeanD x s n
+popMeanD x s n
 
     OUT ( 2434.87, 2665.13 )
 
@@ -434,24 +452,39 @@ popMeanD x s n =
 
 
 {-| popStandardD
-    母標準偏差の推定
+母標準偏差の推定
 
     popStandardD 8 10 0.975
 
-    OUT (14.605, 5.503)
+    OUT ( 14.605, 5.503 )
+
 -}
-popStandardD:Float -> Int -> Float -> (Float, Float)
+popStandardD : Float -> Int -> Float -> ( Float, Float )
 popStandardD s n cc =
     let
-        sSquare = s ^ 2
-        m = n - 1
-        minMin = roundNum 4 (1 - cc)
-        chiMax = chiGet m cc
-        chiMin = chiGet m minMin
-        resultOne = roundNum 3 (sqrt ((toFloat m) * sSquare / chiMax))
-        resultTwo = roundNum 3 (sqrt ((toFloat m) * sSquare / chiMin))
+        sSquare =
+            s ^ 2
+
+        m =
+            n - 1
+
+        minMin =
+            roundNum 4 (1 - cc)
+
+        chiMax =
+            chiGet m cc
+
+        chiMin =
+            chiGet m minMin
+
+        resultOne =
+            roundNum 3 (sqrt (toFloat m * sSquare / chiMax))
+
+        resultTwo =
+            roundNum 3 (sqrt (toFloat m * sSquare / chiMin))
     in
-        Tuple.pair resultOne resultTwo
+    Tuple.pair resultOne resultTwo
+
 
 
 --------分布のための関数ここまで、--------------------------
@@ -502,90 +535,148 @@ combination n m =
     factorial n // (factorial (n - m) * factorial m)
 
 
+
 ------色々やってくれる優しい関数ここまで
 
 
+-- 仮定と分析の関数
+
+
 {-| hypothesisForAlpha
-    仮説検定、初めてのbooleanを返す関数
-    例題：「新製品の寿命は１８０時間より長い（μ＞１８０）」
-    という仮説を立て、
-    標本の数１００個の平均を調べたら１９８であった。
-    この仮説はTrueですか？Falseですか？
-    hypothesisForAlpha 180 20 100 198
+仮説検定、初めてのbooleanを返す関数
+例題：「新製品の寿命は１８０時間より長い（μ＞１８０）」
+という仮説を立て、
+標本の数１００個の平均を調べたら１９８であった。
+この仮説はTrueですか？Falseですか？
+hypothesisForAlpha 180 20 100 198
 
     OUT True
+
 -}
 hypothesisForAlpha : Float -> Float -> Int -> Float -> Bool
 hypothesisForAlpha mu sigma n aveRage =
     let
-        cz = 1.645
+        cz =
+            1.645
+
         -- 棄却域
-        criticalRegion = mu + cz * sigma / (sqrt (toFloat n))
+        criticalRegion =
+            mu + cz * sigma / sqrt (toFloat n)
     in
-        if aveRage > criticalRegion then Basics.True else Basics.False
+    if aveRage > criticalRegion then
+        Basics.True
+
+    else
+        Basics.False
 
 
 {-| hypothesisNotAlpha
-    母標準偏差αがわからん場合の仮説検定
-    例題:標本が20で標本平均が
+母標準偏差αがわからん場合の仮説検定
+例題:標本が20で標本平均が
 -}
-hypothesisNotAlpha:Float -> Int -> Float -> Float -> Float -> Bool
+hypothesisNotAlpha : Float -> Int -> Float -> Float -> Float -> Bool
 hypothesisNotAlpha mu n xi s a =
     let
-        ct = tDistIntentionalLevelFivePer (n - 1)
-        xii = mu + ct * s / (sqrt (toFloat n))
+        ct =
+            tDistIntentionalLevelFivePer (n - 1)
+
+        xii =
+            mu + ct * s / sqrt (toFloat n)
     in
-        if xi > xii then True else False
+    if xi > xii then
+        True
+
+    else
+        False
+
+
+-- TODO: この辺に分析のための補助関数を作成する。
 
 
 {-| rawData
-    2つのリストを受け取ってr2とrに相当する値を返す。
+2つのリストを受け取ってr2とrに相当する値を返す。
 
-    rawData [580, 600, 470, 450, 450, 480] [50.1, 51.2, 46.1, 46.0, 47.0, 48.5]
+    rawData [ 580, 600, 470, 450, 450, 480 ] [ 50.1, 51.2, 46.1, 46.0, 47.0, 48.5 ]
 
     OUT 0.9373
+
 -}
-rawData:List Float -> List Float -> Float
+rawData : List Float -> List Float -> Float
 rawData xi yi =
     let
-        sigmaXY = List.sum (List.map2 (*) xi yi)
-        averageXi = average xi
-        averageYi = average yi
-        i = (sigmaXY - (toFloat (length xi))*averageXi*averageYi) ^ 2
-        xjj = (List.sum (List.map (\x -> x ^ 2) xi)) - (toFloat (length xi)) * averageXi ^ 2
-        yjj = (List.sum (List.map (\y -> y ^ 2) yi)) - (toFloat (length yi)) * averageYi ^ 2
+        sigmaXY =
+            List.sum (List.map2 (*) xi yi)
+
+        averageXi =
+            average xi
+
+        averageYi =
+            average yi
+
+        i =
+            (sigmaXY - toFloat (length xi) * averageXi * averageYi) ^ 2
+
+        xjj =
+            List.sum (List.map (\x -> x ^ 2) xi) - toFloat (length xi) * averageXi ^ 2
+
+        yjj =
+            List.sum (List.map (\y -> y ^ 2) yi) - toFloat (length yi) * averageYi ^ 2
     in
-        roundNum 4 (sqrt (i / (xjj * yjj)))
+    roundNum 4 (sqrt (i / (xjj * yjj)))
 
 
 {-| classifiedData
-    観測したデータの数も視野に入れた統計計算
+観測したデータの数も視野に入れた統計計算
 
-    classifiedData [0.0, 0.5, 1.0, 1.5, 2.0, 2.5] [182, 168, 151, 130, 124, 120] [2, 3, 4, 6, 5, 2]
+    classifiedData [ 0.0, 0.5, 1.0, 1.5, 2.0, 2.5 ] [ 182, 168, 151, 130, 124, 120 ] [ 2, 3, 4, 6, 5, 2 ]
 
     OUT -0.967
+
 -}
-classifiedData:List Float -> List Float -> List Float -> Dict String Float
+classifiedData : List Float -> List Float -> List Float -> Dict String Float
 classifiedData xi yi f =
     let
-        averageXi = roundNum 4 (1/(List.sum f) * List.sum (List.map2 (*) xi f))
-        averageYi = roundNum 4 (1/(List.sum f) * List.sum (List.map2 (*) yi f))
-        xSum = List.sum xi
-        ySum = List.sum yi
-        fSum = List.sum f
-        x2i = List.map (\x -> x ^ 2) xi
-        y2i = List.map (\y -> y ^ 2) yi
-        xfSum = List.sum (List.map2 (*) x2i f)
-        yfSum = List.sum (List.map2 (*) y2i f)
-        xyfSum = List.sum (List.map2 (*) xi (List.map2 (*) yi f) )
-        up = (xyfSum - fSum*averageXi*averageYi) ^ 2
-        down = (xfSum - fSum*averageXi^2) * (yfSum - fSum*averageYi^2)
+        averageXi =
+            gigaAverage xi f
+
+        averageYi =
+            gigaAverage yi f
+
+        xSum =
+            List.sum xi
+
+        ySum =
+            List.sum yi
+
+        fSum =
+            List.sum f
+
+        x2i =
+            List.map (\x -> x ^ 2) xi
+
+        y2i =
+            List.map (\y -> y ^ 2) yi
+
+        xfSum =
+            List.sum (List.map2 (*) x2i f)
+
+        yfSum =
+            List.sum (List.map2 (*) y2i f)
+
+        xyfSum =
+            List.sum (List.map2 (*) xi (List.map2 (*) yi f))
+
+        up =
+            (xyfSum - fSum * averageXi * averageYi) ^ 2
+
+        down =
+            (xfSum - fSum * averageXi ^ 2) * (yfSum - fSum * averageYi ^ 2)
     in
-        Dict.fromList [ ( "r2", roundNum 4 (-(Basics.sqrt (up / down))) ), ( "r", roundNum 4 (up / down ) ) ]
+    Dict.fromList [ ( "r2", roundNum 4 -(Basics.sqrt (up / down)) ), ( "r", roundNum 4 (up / down) ) ]
 
 
 {-| olsRawData
-    OLS(最小2乗法)の関数
+OLS(最小2乗法)の関数
 
     2つのList Float を受け取って Dict String Float を返す。
     olsRawData [5, 10, 15, 20, 25, 30] [13, 14, 18, 19, 22, 26]
@@ -594,22 +685,39 @@ classifiedData xi yi f =
     OUT [ ( "b", 0.5143 ), ( "a", 9.67 ), ( "r2", 0.9697 ), ( "r", 0.9847 )]
 
 -}
-olsRawData:List Float -> List Float -> Dict String Float
+olsRawData : List Float -> List Float -> Dict String Float
 olsRawData xi yi =
     let
-        xiAverage = average xi
-        yiAverage = average yi
-        n = toFloat (List.length xi)
-        devXi = deviation xi
-        devYi = deviation yi
-        momentXiYi = List.sum (List.map2 (*) devXi devYi)
+        xiAverage =
+            average xi
+
+        yiAverage =
+            average yi
+
+        n =
+            toFloat (List.length xi)
+
+        devXi =
+            deviation xi
+
+        devYi =
+            deviation yi
+
+        momentXiYi =
+            List.sum (List.map2 (*) devXi devYi)
+
         -- 勾配
-        b = roundNum 4 (momentXiYi / List.sum (List.map (\x -> x ^ 2) (deviation xi)))
+        b =
+            roundNum 4 (momentXiYi / List.sum (List.map (\x -> x ^ 2) (deviation xi)))
+
         -- 定数項
-        a = roundNum 2 (yiAverage - b * xiAverage)
-        rSquare = roundNum 4 ((momentXiYi ^ 2) / (List.sum (List.map (\x -> x ^ 2) devXi) * List.sum (List.map (\x -> x ^ 2) devYi)))
+        a =
+            roundNum 2 (yiAverage - b * xiAverage)
+
+        rSquare =
+            roundNum 4 ((momentXiYi ^ 2) / (List.sum (List.map (\x -> x ^ 2) devXi) * List.sum (List.map (\x -> x ^ 2) devYi)))
     in
-        Dict.fromList [ ( "b", b ), ( "a", a ), ( "r2", rSquare  ), ( "r", roundNum 4 (sqrt rSquare) ) ]
+    Dict.fromList [ ( "b", b ), ( "a", a ), ( "r2", rSquare ), ( "r", roundNum 4 (sqrt rSquare) ) ]
 
 
 {-| olsClassifiedData
@@ -619,19 +727,57 @@ olsRawData xi yi =
     2つのList Float を受け取って Dict String Float を返す。
     olsClassifiedData [5, 10, 15, 20, 25, 30] [13, 14, 18, 19, 22, 26]
     -- 少数4桁ほどのほうが扱いやすそう(未検証)
+
 -}
-olsClassifiedData:List Float -> List Float -> List Float -> Dict String Float
+olsClassifiedData : List Float -> List Float -> List Float -> Dict String Float
 olsClassifiedData xi yi f =
     let
-        averageXi = (1/(List.sum f) * List.sum (List.map2 (*) xi f)) |> roundNum 4
-        averageYi = (1/(List.sum f) * List.sum (List.map2 (*) yi f)) |> roundNum 4
-        momentXiYi = List.sum (List.map2 (*) f (List.map2 (*) xi yi)) - ((List.sum f) * averageXi * averageYi) |> roundNum 2
-        momentXi2 = List.sum (List.map2 (*) f (List.map (\x -> x ^ 2) xi)) - (List.sum f) * averageXi ^ 2 |> roundNum 2
-        momentYi2 = List.sum (List.map2 (*) f (List.map (\y -> y ^ 2) yi)) - (List.sum f) * averageYi ^ 2 |> roundNum 2
+        averageXi =
+            gigaAverage xi f
+
+        averageYi =
+            gigaAverage yi f
+
+        momentXiYi =
+            List.sum (List.map2 (*) f (List.map2 (*) xi yi)) - (List.sum f * averageXi * averageYi) |> roundNum 2
+
+        momentXi2 =
+            List.sum (List.map2 (*) f (List.map (\x -> x ^ 2) xi)) - List.sum f * averageXi ^ 2 |> roundNum 2
+
+        momentYi2 =
+            List.sum (List.map2 (*) f (List.map (\y -> y ^ 2) yi)) - List.sum f * averageYi ^ 2 |> roundNum 2
+
+        clineB =
+            momentXiYi / momentXi2 |> roundNum 4
+        
+        r2 =
+            (momentXiYi ^ 2) / (momentXi2 * momentYi2) |> roundNum 4 
+
     in
-        Dict.fromList [("D", Debug.log "momentXiYi" momentXiYi), ("D2", Debug.log "momentYi2" momentYi2), ("D3", Debug.log "momentXi2" momentXi2)]
+        Dict.fromList [ ( "r2", r2 ), ( "r", (sqrt r2) |> roundNum 4 ), ( "b", clineB ), ( "a", averageYi - clineB * averageXi |> roundNum 4 ) ]
 
 
-regressionAnalysisRaw:List Float -> List Float -> Dict String Float
+regressionAnalysisRaw : List Float -> List Float -> Dict String Float
 regressionAnalysisRaw xi yi =
-    Debug.todo "回帰係数・相関係数の計測と検定を行う"
+    let
+        ols = olsRawData xi yi
+        clineB = Maybe.withDefault 0 <| Dict.get "b" ols
+        constA = Maybe.withDefault 0 <| Dict.get "a" ols
+        rSquare = Maybe.withDefault 0 <| Dict.get "r2" ols
+        r = Maybe.withDefault 0 <| Dict.get "r" ols
+        -- 理論値 ^Y = a + bXi
+        theoreticalValue = List.map (\x -> constA + clineB * x) xi
+        -- 残差
+        remainderSqare = List.map (\y -> y ^ 2) (List.map2 (-) yi theoreticalValue)
+        sigmaTwo = (List.sum remainderSqare |> roundNum 4) / toFloat ((length yi) - 2)
+        decentrationA = (1 / toFloat (length xi) + ((average xi) ^ 2) / ((List.sum (List.map (\x -> x ^ 2) xi) ) - toFloat (length xi) * (average xi) ^ 2 ) ) * sigmaTwo
+        decentrationB = 1 / ((List.sum (List.map (\x -> x ^ 2) xi)) - toFloat (length xi) * (average xi) ^ 2) * sigmaTwo
+        ta = constA / (sqrt decentrationA) |> roundNum 4
+        tb = clineB / (sqrt decentrationB) |> roundNum 4
+    in
+        Dict.fromList [ ( "b", clineB ), ( "a", constA ), ("r", r ), ("ta", ta), ("tb", tb)]
+    
+
+
+-- TODO: 有意性検定を行うために何％有意水準を取り出す関数を実装する。
+

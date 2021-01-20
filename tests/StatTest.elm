@@ -272,6 +272,6 @@ correlationTest =
                     xi = [ 10, 20, 30, 40, 50 ]
                     yi = [ 16, 19, 28, 36, 42 ]
                 in
-                    Dict.fromList [ ( "a", 7.5 ), ( "b", 0.69 ), ( "ta", 4.20 ), ( "tb", 12.80), ( "r", 0.9910 )]
+                    Dict.fromList [ ( "a", 7.5 ), ( "b", 0.69 ), ( "ta", 4.1992 ), ( "tb", 12.813), ( "r", 0.9910 )]
                         |> equalDicts ( regressionAnalysisRaw xi yi)
         ]
