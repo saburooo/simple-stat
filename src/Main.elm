@@ -9,7 +9,7 @@
 モデルは如何定義するかはまだ検討中
 -}
 
-module Main exposing (main)
+module Main exposing (..)
 
 
 import Stat
@@ -45,8 +45,8 @@ main =
 type alias Model =
     { key : Nav.Key
     , url : Url.Url
+    , listOne : String
     {-
-    , listOne : List Float
     , listTwo : List Float
     , listThree : List Float
     -}
@@ -103,6 +103,11 @@ update msg model =
             ( { model | url = urlUrl }
             , Cmd.none
             )
+
+
+stringToListFloat:String -> List Float
+stringToListFloat str =
+    Debug.todo "どうやってstrをList Float に変換するか"
 
 
 -- SUBSCRIPTIONS
