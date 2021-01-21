@@ -1,7 +1,6 @@
 module Data exposing (..)
 
 import Dict exposing (Dict)
-import Browser.Navigation exposing (Key)
 
 
 {-| standardNormalDistoributionUpper
@@ -259,6 +258,13 @@ chiGet n cc =
         Maybe.withDefault 1 (Dict.get cc pickUp)
 
 
+-- TODO: これに限らず値を取り出すのではなくちゃんと計算して求める関数にしていきたい。
+{-| pickUpSignificance
+  Int と Float を受け取って　有意水準の値を返す。
+
+  pickUpSignificance 1 0.05
+  OUT 0.996917
+-}
 pickUpSignificance:Int -> Basics.Float -> Basics.Float
 pickUpSignificance key v =
     let

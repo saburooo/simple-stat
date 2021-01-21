@@ -9,8 +9,10 @@
 モデルは如何定義するかはまだ検討中
 -}
 
-module Main exposing (..)
+module Main exposing (main)
 
+
+import Stat
 
 
 -- MAIN
@@ -23,22 +25,21 @@ main =
         }
 
 
+
+-- MODEL
+
+type alias Model =
+    { listOne : List Float
+    , listTwo : List Float
+    , listThree : List Float
+    }
+
+
+type Msg
+    = ListGet List Float
+    | Submit String
+
+
 init : Model
 init =
   []
-
-
--- MODEL
-type Status
-  = Avarage
-  | Deviation
-  | StandardDeviation
-
-
-type alias Model
-  = List
-
-
-
-type alias Msg
-  = {status | Status}
