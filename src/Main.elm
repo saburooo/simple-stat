@@ -15,9 +15,15 @@ module Main exposing (main)
 import Stat
 import Browser
 import Browser.Navigation as Nav
+
 import Html exposing (..)
 import Html.Attributes exposing (..)
+
 import Url
+import Url.Parser exposing ((</>), s, int, top, map)
+import Url.Parser exposing (Parser)
+import Url.Parser exposing (oneOf)
+import Url.Parser
 
 
 -- MAIN
@@ -39,10 +45,32 @@ main =
 type alias Model =
     { key : Nav.Key
     , url : Url.Url
+    {-
     , listOne : List Float
     , listTwo : List Float
     , listThree : List Float
+    -}
     }
+
+
+-- URL
+type Route
+    = Top
+    | Average
+
+
+routeParser : Parser (Route -> a) a
+routeParser =
+    oneOf
+        [ Url.Parser.map Top top
+        , Url.Parser.map Average (s "average")
+        ]
+
+
+urlToRoute : Url -> Maybe Route
+urlToRoute url =
+    Url.Parser.parse routeParser url
+
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg)
@@ -85,6 +113,7 @@ subscriptions _ =
       Sub.none
 
 
+
 -- VIEW
 
 
@@ -102,7 +131,7 @@ view model =
           , viewLink "/hypothesis"
           , viewLink "/bidistribution"
           , viewLink "/mother_standard_deviation"
-          , viewLink "/rawData"
+          , viewLink "/raw_data"
           ]
         ]
     }

@@ -1,6 +1,6 @@
 module StatTest exposing (..)
 
-import Dict exposing (Dict)
+import Dict
 import Expect exposing (equal, equalDicts, equalLists, greaterThan, within)
 import List
 import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, factorial, permutation,combination, biDistributionProbability, biDistribution)

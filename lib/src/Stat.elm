@@ -1,4 +1,4 @@
-module Stat exposing (average, sDNForDict, confidenceLimit, popMeanD, popStandardD, biDistribution, poisson, combination, rawData, hypothesisForAlpha, hypothesisNotAlpha, chiSquare, coefficientOfVariation, deviation, regressionAnalysisRaw, olsClassifiedData, olsRawData, standardDeviation)
+module Stat exposing (..)
 
 -- TODO 実際に使う関数を厳選する。
 {- モジュールを公開する気でその書き方も練習しよう
