@@ -13,11 +13,10 @@ module Stat exposing (..)
 -}
 
 import Data exposing (chiGet, standardNormalDistoributionUpper, tDistIntentionalLevelFivePer)
-import Dict exposing (Dict, foldl, foldr)
+import Dict exposing (Dict)
 import Html.Attributes exposing (list)
 import List exposing (length, map, sum)
 import Round exposing (roundNum)
-import Fuzz exposing (constant)
 
 
 {-| 算術平均、Float入Listを受け取ってFloatを返す
