@@ -9,36 +9,105 @@
 モデルは如何定義するかはまだ検討中
 -}
 
-module Main exposing (..)
+module Main exposing (main)
 
+
+import Stat
+import Browser
+import Browser.Navigation as Nav
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Url
 
 
 -- MAIN
 main : Program () Model Msg
 main =
-    Browser.sandbox
+    Browser.application
         { init = init
         , view = view
         , update = update
+        , subscriptions = subscriptions
+        , onUrlChange = UrlChanged
+        , onUrlRequest = LinkClicked
         }
 
 
-init : Model
-init =
-  []
-
 
 -- MODEL
-type Status
-  = Avarage
-  | Deviation
-  | StandardDeviation
+
+type alias Model =
+    { key : Nav.Key
+    , url : Url.Url
+    , listOne : List Float
+    , listTwo : List Float
+    , listThree : List Float
+    }
 
 
-type alias Model
-  = List
+init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg)
+init flags url key =
+    (Model key url, Cmd.none)
 
 
+-- UPDATE
 
-type alias Msg
-  = {status | Status}
+
+type Msg
+    = LinkClicked Browser.UrlRequest
+    | UrlChanged Url.Url
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        LinkClicked urlRequestBrowser ->
+            case urlRequestBrowser of
+                -- 内部リンクならURLを更新
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.key (Url.toString url ))
+
+                -- 外部なら普通に画面を遷移させる。
+                Browser.External href ->
+                    ( model, Nav.load href )
+
+        UrlChanged urlUrl ->
+            ( { model | url = urlUrl }
+            , Cmd.none
+            )
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+      Sub.none
+
+
+-- VIEW
+
+
+view : Model -> Browser.Document Msg
+view model =
+    { title = "オレオレ統計ライブラリーデモ"
+    , body =
+        [ text "この中から計算して欲しいものを選んでね:"
+        , b [] [text (Url.toString model.url)]
+        , ul []
+          -- 各リンクからくり行くイベントだぁ
+          [ viewLink "/home"
+          , viewLink "/average"
+          , viewLink "/population_mean"
+          , viewLink "/hypothesis"
+          , viewLink "/bidistribution"
+          , viewLink "/mother_standard_deviation"
+          , viewLink "/rawData"
+          ]
+        ]
+    }
+
+
+viewLink: String -> Html msg
+viewLink path =
+  li [] [ a [ href path ] [text path ] ]
