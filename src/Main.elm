@@ -75,7 +75,7 @@ urlToRoute url =
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg)
 init flags url key =
-    (Model key url, Cmd.none)
+    (Model key url listOne="", Cmd.none)
 
 
 -- UPDATE
@@ -84,6 +84,7 @@ init flags url key =
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
+    | OneList String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -105,9 +106,19 @@ update msg model =
             )
 
 
-stringToListFloat:String -> List Float
+{-|
+  stringToListFloat "1,2,3,4,5"
+  OUT [ 1.0, 2.0, 3.0, 4.0, 5.0 ]
+-}
+stringToListFloat: String -> List Float
 stringToListFloat str =
-    Debug.todo "どうやってstrをList Float に変換するか"
+    let
+       strList = String.split "," str
+    in
+      List.map (\s -> Maybe.withDefault 0 (String.toFloat s)) strList
+
+
+-- TODO 入力された値をリストにするのはいいとして果たしてそれがうまく行くのか
 
 
 -- SUBSCRIPTIONS
@@ -128,8 +139,9 @@ view model =
     , body =
         [ text "この中から計算して欲しいものを選んでね:"
         , b [] [text (Url.toString model.url)]
+        , input [ placeholder "何らかの数字を,間隔で入力してね。" value model.listOne, onInput OneList ]
         , ul []
-          -- 各リンクからくり行くイベントだぁ
+          -- 各リンクからクリックで計算式へ
           [ viewLink "/home"
           , viewLink "/average"
           , viewLink "/population_mean"
