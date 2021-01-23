@@ -18,7 +18,10 @@ import Fuzz exposing (string)
 
 import Url
 
-import Main exposing (stringToListFloat)
+import Main exposing (stringToListFloat, listFloatToString)
+import Expect exposing (equal)
+import Expect exposing (atLeast)
+import Expect exposing (equalLists)
 
 
 -- TODO HTMLのUIをどうする?まずはボタンを設計するか？
@@ -37,13 +40,20 @@ stringTest =
               |> Query.fromHtml
               |> Event.simulate (Event.input "1,2,3,4,5")
               |> Event.expect (Change "1,2,3,4,5")
-        , fuzz (string) "ありとあらゆる文字列が入力されちまっても大丈夫なのか" <|
-          \fuzzString ->
-            fuzzString
-              |> Debug.log "input"
+
+        , fuzz string "ありとあらゆる文字列が入力されちまっても大丈夫なのか" <|
+          \randomString ->
+            randomString
               |> stringToListFloat
               |> Debug.log "output"
+              |> Expect.atLeast []
+        , test "しっかり文字列をFloat入リストに変換" <|
+          \_ ->
+            equalLists [1.0,2.0,3.0,4.0,5.0] (stringToListFloat "1,2,3,4,5")
         ]
+        , test "今度はList Floatを文字列に変換" <|
+          \_ ->
+            equal "1.5,2.5,3.5,4.5,5.3" (listFloatToString [1.5,2.5,3.5,4.5,5.3])
       ]
 
 
