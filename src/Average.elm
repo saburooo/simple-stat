@@ -4,6 +4,8 @@ import Stat
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
+import Browser
+
 
 type alias Model =
     { state : State
@@ -45,12 +47,10 @@ update msg model =
              ( { model | listThee=str }, Cmd.none )
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view model =
-    case model.state of
-        Init ->
-            text "Loading..."
-
-        Input _ ->
-            Debug.todo "どうやって平均を得る"
-
+  {
+    ul [][
+      li [] [ text "騒がしい夜に" ]
+    ]
+}

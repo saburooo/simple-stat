@@ -112,7 +112,7 @@ update msg model =
             ( { model | url = urlUrl }
             , Cmd.none
             )
-        
+
         OneList str ->
             ( { model | listOne = str}
             , Cmd.none
@@ -141,7 +141,7 @@ stringToListFloat str =
       List.map (\s -> Maybe.withDefault 0 (String.toFloat s)) strList
 
 
-{-| 
+{-|
 受け取った List Float を文字列にしてくっつけたい
 listFloatToString [1.0, 2.0, 3.0, 4.0, 5.0]
 OUT "1.0, 2.0, 3.0, 4.0, 5.0"
@@ -176,15 +176,11 @@ view model =
         , b [] [text (Url.toString model.url)]
         , br [] []
         , input [ placeholder "何らかの数字を , 間隔で入力してね。", value model.listOne, onInput OneList ] []
+        , input [ placeholder "何らかの数字を , 間隔で入力してね。", value model.listTwo, onInput TwoList ] []
+        , input [ placeholder "何らかの数字を , 間隔で入力してね。", value model.listThee, onInput ThreeList ] []
         , div [] [ text <| String.append "入力された値の平均値:" <| String.fromFloat <| roundNum 4 <| Stat.average <| stringToListFloat model.listOne ]
         , div [] [ text <| String.append "入力された値の偏差:" <| listFloatToString <| List.map (\x -> roundNum 4 x) <| Stat.deviation <| stringToListFloat model.listOne ]
+        , div [] [ text <| String.append "入力された値の偏差:" <| listFloatToString <| List.map (\x -> roundNum 4 x) <| Stat.deviation <| stringToListFloat model.listOne ]
           -- 各リンクからクリックで計算式へ
-        , case model.route of
-            Top ->
-                div [] [ text "土器がムネムネ" ]
-
-            Average ->
-                Average.view Average.Model
         ]
     }
-
