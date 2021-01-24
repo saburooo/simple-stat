@@ -112,7 +112,7 @@ update msg model =
 stringToListFloat: String -> List Float
 stringToListFloat str =
     let
-       strList = String.split ", " str
+       strList = String.split "," str
     in
       List.map (\s -> Maybe.withDefault 0 (String.toFloat s)) strList
         |> List.filter (\x -> x /= 0)
@@ -150,11 +150,14 @@ view model =
     , body =
         [ h1 [] [ text "この中から計算して欲しいものを選んでね:" ]
         , br [] []
-        , input [ placeholder "何らかの数字を , 間隔で入力してね。", value model.listOne, onInput OneList ] []
-        , input [ placeholder "何らかの数字を , 間隔で入力してね。", value model.listTwo, onInput TwoList ] []
-        , input [ placeholder "何らかの数字を , 間隔で入力してね。", value model.listThree, onInput ThreeList ] []
+        , input [ placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
+        , br [][]
+        , input [ placeholder ", 間隔で数字を入力してね。", value model.listTwo, onInput TwoList ] []
+        , br [][]
+        , input [ placeholder ", 間隔で数字を入力してね。", value model.listThree, onInput ThreeList ] []
+        , br [][]
         , oneValueView model.listOne "入力された値の平均値:" Stat.average
-        , oneValueView model.listTwo "入力された値の変動係数:" Stat.coefficientOfVariation
+        , oneValueView model.listOne "入力された値の変動係数:" Stat.coefficientOfVariation
         , oneValueView model.listOne "入力された値の標準偏差:" Stat.standardDeviation
         , manyValueView model.listOne "入力された値の偏差:" Stat.deviation
         , fiducialView (Stat.fiducialInterval (toFloat (List.length (stringToListFloat model.listOne) )) (Stat.standardDeviation (stringToListFloat model.listOne)))
