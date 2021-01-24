@@ -28,6 +28,7 @@ import Url.Parser exposing (Parser)
 import Url.Parser exposing (oneOf)
 import Url.Parser
 
+import Dict exposing (Dict)
 
 -- MAIN
 main : Program () Model Msg
@@ -114,6 +115,7 @@ stringToListFloat str =
        strList = String.split ", " str
     in
       List.map (\s -> Maybe.withDefault 0 (String.toFloat s)) strList
+        |> List.filter (\x -> x /= 0)
 
 
 {-|
@@ -155,14 +157,14 @@ view model =
         , oneValueView model.listTwo "入力された値の変動係数:" Stat.coefficientOfVariation
         , oneValueView model.listOne "入力された値の標準偏差:" Stat.standardDeviation
         , manyValueView model.listOne "入力された値の偏差:" Stat.deviation
-          -- 各リンクからクリックで計算式へ
+        , fiducialView (Stat.fiducialInterval (toFloat (List.length (stringToListFloat model.listOne) )) (Stat.standardDeviation (stringToListFloat model.listOne)))
         ]
     }
 
 
 {-|
 List Float -> Float を受け取って
-listFloatView model.string "何らかのメッセージ" average 
+listFloatView model.string "何らかのメッセージ" average
 -}
 oneValueView: String -> String -> (List Float -> Float) -> Html Msg
 oneValueView listFloat strText funcL =
@@ -176,3 +178,10 @@ manyValueView listFloat strText funcL =
     div [] [ text <| String.append strText <| listFloatToString <| List.map (\x -> roundNum 4 x) <| funcL <| stringToListFloat listFloat ]
 
 
+fiducialView: Dict String Float -> Html Msg
+fiducialView fiducialDict =
+  let
+      mini = (String.fromFloat <| Maybe.withDefault 0 (Dict.get "min" fiducialDict))
+      maxi = (String.fromFloat <| Maybe.withDefault 0 (Dict.get "max" fiducialDict))
+  in
+    div [] [ text ("信頼区間の...最小値" ++ mini ++ " 最大値" ++ maxi) ]
