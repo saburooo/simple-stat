@@ -574,7 +574,7 @@ hypothesisForAlpha mu sigma n aveRage =
 例題:標本が20で標本平均が
 -}
 hypothesisNotAlpha : Float -> Int -> Float -> Float -> Float -> Bool
-hypothesisNotAlpha mu n xi s a =
+hypothesisNotAlpha mu n xi s _ =
     let
         ct =
             tDistIntentionalLevelFivePer (n - 1)
@@ -641,12 +641,6 @@ classifiedData xi yi f =
         averageYi =
             gigaAverage yi f
 
-        xSum =
-            List.sum xi
-
-        ySum =
-            List.sum yi
-
         fSum =
             List.sum f
 
@@ -692,9 +686,6 @@ olsRawData xi yi =
 
         yiAverage =
             average yi
-
-        n =
-            toFloat (List.length xi)
 
         devXi =
             deviation xi
@@ -756,6 +747,12 @@ olsClassifiedData xi yi f =
         Dict.fromList [ ( "r2", r2 ), ( "r", (sqrt r2) |> roundNum 4 ), ( "b", clineB ), ( "a", averageYi - clineB * averageXi |> roundNum 4 ) ]
 
 
+{-| regressionAnalysisRaw
+回帰分析の関数
+regressionAnalysisRaw [ 10, 20, 30, 40, 50 ] [ 16, 19, 28, 36, 42 ]
+
+OUT Dict.fromList [ ( "a", 7.5 ), ( "b", 0.69 ), ( "ta", 4.1992 ), ( "tb", 12.813), ( "r", 0.9910 )]
+-}
 regressionAnalysisRaw : List Float -> List Float -> Dict String Float
 regressionAnalysisRaw xi yi =
     let

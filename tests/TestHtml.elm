@@ -6,7 +6,6 @@ import Test exposing (test)
 
 import Html
 
-import Stat
 import Html
 import Html.Events exposing (onInput)
 
@@ -16,11 +15,8 @@ import Test exposing (fuzz)
 
 import Fuzz exposing (string)
 
-import Url
-
 import Main exposing (stringToListFloat, listFloatToString)
 import Expect exposing (equal)
-import Expect exposing (atLeast)
 import Expect exposing (equalLists)
 
 

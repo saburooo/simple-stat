@@ -210,7 +210,6 @@ hypothesisTest =
                     sigma = 20
                     n = 100
                     aveRage = 198
-                    a = 0.05
                     -- TODO 有意水準の臨界値を求める関数を求める。
                     cz = 1.645
                 in
