@@ -20,15 +20,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 
-import Url
-import Url exposing (Url)
-
-import Url.Parser exposing ((</>), s, top)
-import Url.Parser exposing (Parser)
-import Url.Parser exposing (oneOf)
-import Url.Parser
-
 import Dict exposing (Dict)
+import Html.Events exposing (onClick)
+
 
 -- MAIN
 main : Program () Model Msg
@@ -55,21 +49,8 @@ type alias Model =
 -- URL
 type Route
     = Top
-    | Average
-
-
-routeParser : Parser (Route -> a) a
-routeParser =
-    oneOf
-        [ Url.Parser.map Top top
-        , Url.Parser.map Average (Url.Parser.s "average")
-        ]
-
-
-urlToRoute : Url -> Maybe Route
-urlToRoute url =
-    Url.Parser.parse routeParser url
-
+    | Ols
+    | Regres
 
 
 init : () -> ( Model, Cmd Msg)
@@ -84,6 +65,9 @@ type Msg
     = OneList String
     | TwoList String
     | ThreeList String
+    | TopPage
+    | OLS
+    | Regression
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -104,6 +88,21 @@ update msg model =
             , Cmd.none
             )
 
+        TopPage ->
+            ( { model | route = Top }
+            , Cmd.none
+            )
+
+        OLS ->
+            ( { model | route = Ols }
+            , Cmd.none
+            )
+
+        Regression ->
+            ( { model | route = Regres }
+            , Cmd.none
+            )
+
 
 {-|
   stringToListFloat "1,2,3,4,5"
@@ -115,6 +114,7 @@ stringToListFloat str =
        strList = String.split "," str
     in
       List.map (\s -> Maybe.withDefault 0 (String.toFloat s)) strList
+        -- これだと０の値が本当に入っている場合に計算できない。
         |> List.filter (\x -> x /= 0)
 
 
@@ -148,21 +148,61 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "オレオレ統計ライブラリーデモ"
     , body =
-        [ h1 [] [ text "この中から計算して欲しいものを選んでね:" ]
-        , br [] []
-        , input [ placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
-        , br [][]
-        , input [ placeholder ", 間隔で数字を入力してね。", value model.listTwo, onInput TwoList ] []
-        , br [][]
-        , input [ placeholder ", 間隔で数字を入力してね。", value model.listThree, onInput ThreeList ] []
-        , br [][]
-        , oneValueView model.listOne "入力された値の平均値:" Stat.average
-        , oneValueView model.listOne "入力された値の変動係数:" Stat.coefficientOfVariation
-        , oneValueView model.listOne "入力された値の標準偏差:" Stat.standardDeviation
-        , manyValueView model.listOne "入力された値の偏差:" Stat.deviation
-        , fiducialView (Stat.fiducialInterval (toFloat (List.length (stringToListFloat model.listOne) )) (Stat.standardDeviation (stringToListFloat model.listOne)))
+        -- 一番上にリンクを貼ってなんとかする。
+        [
+            div [ class "columns" ]
+            [
+                div [ class "column is-one-thirds" ] 
+                [ h1 [ class "title"] [ text "メニューです" ]
+                    , ul [ class "" ]
+                        [ buttonLink TopPage "平均値"
+                        , buttonLink OLS "OLS最小二乗法"
+                        , buttonLink Regression "回帰分析"
+                    ]
+                ]
+                , div [ class "column is-two-thirds" ]
+                    [ topView model
+                    , br [] []
+                    ]
+            ]
         ]
     }
+
+
+topView:Model -> Html Msg
+topView model =
+    let
+        one = stringToListFloat model.listOne
+        two = stringToListFloat model.listTwo
+        three = stringToListFloat model.listThree
+    in
+        case model.route of
+            Top ->
+                div [] [ h1 [ class "title" ] [ text "平均値、変動係数、標準偏差、偏差" ]
+                        , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
+                        , br [] []
+                        , oneValueView model.listOne "入力された値の平均値は" Stat.average
+                        , oneValueView model.listOne "入力された値の変動係数は" Stat.coefficientOfVariation
+                        , oneValueView model.listOne "入力された値の標準偏差は" Stat.standardDeviation
+                        , manyValueView model.listOne "入力された値の偏差は" Stat.deviation
+                        , fiducialView (Stat.fiducialInterval (toFloat (List.length (one) )) (Stat.standardDeviation (one)))
+                    ]
+
+            Ols ->
+                div []
+                [ h1 [ class "title" ] [ text "工事中" ]
+                , p [] [ text "リストその１" ]
+                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
+                , p [] [ text "リストその２" ]
+                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listTwo, onInput TwoList ] []
+                , p [] [ text "リストその３" ]
+                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listThree, onInput ThreeList ] []
+                , div [] [ text "Raw data の推計" ]
+                , div [] [ text "Classified data の推計" ]
+                ]
+
+            Regres ->
+                Debug.todo "回帰分析専用ページを設ける。"
 
 
 {-|
@@ -171,7 +211,7 @@ listFloatView model.string "何らかのメッセージ" average
 -}
 oneValueView: String -> String -> (List Float -> Float) -> Html Msg
 oneValueView listFloat strText funcL =
-    div [] [ text <| String.append strText <| String.fromFloat <| roundNum 4 <| funcL <| stringToListFloat listFloat ]
+    div [ class "" ] [ text <| String.append strText <| String.fromFloat <| roundNum 4 <| funcL <| stringToListFloat listFloat ]
 
 
 {-| listView
@@ -184,7 +224,12 @@ manyValueView listFloat strText funcL =
 fiducialView: Dict String Float -> Html Msg
 fiducialView fiducialDict =
   let
-      mini = (String.fromFloat <| Maybe.withDefault 0 (Dict.get "min" fiducialDict))
-      maxi = (String.fromFloat <| Maybe.withDefault 0 (Dict.get "max" fiducialDict))
+      mini = (String.fromFloat <| roundNum 4 <| Maybe.withDefault 0 (Dict.get "min" fiducialDict))
+      maxi = (String.fromFloat <| roundNum 4 <| Maybe.withDefault 0 (Dict.get "max" fiducialDict))
   in
-    div [] [ text ("信頼区間の...最小値" ++ mini ++ " 最大値" ++ maxi) ]
+    div [] [ text ("信頼区間の...最小値は" ++ mini ++ "で最大値は" ++ maxi) ]
+
+
+buttonLink: Msg -> String -> Html Msg
+buttonLink msg str =
+    li [] [ a [ class "button is-link is-outlined is-small is-fullwidth", onClick msg ] [ text str ] ]
