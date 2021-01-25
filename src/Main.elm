@@ -22,6 +22,7 @@ import Html.Events exposing (onInput)
 
 import Dict exposing (Dict)
 import Html.Events exposing (onClick)
+import Debug exposing (todo)
 
 
 -- MAIN
@@ -197,8 +198,8 @@ topView model =
                 , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listTwo, onInput TwoList ] []
                 , p [] [ text "リストその３" ]
                 , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listThree, onInput ThreeList ] []
-                , div [] [ text "Raw data の推計" ]
-                , div [] [ text "Classified data の推計" ]
+                , olsRawDataView one two
+                , olsClassifiedDataView one two three
                 ]
 
             Regres ->
@@ -233,3 +234,44 @@ fiducialView fiducialDict =
 buttonLink: Msg -> String -> Html Msg
 buttonLink msg str =
     li [] [ a [ class "button is-link is-outlined is-small is-fullwidth", onClick msg ] [ text str ] ]
+
+
+olsRawDataView: List Float -> List Float -> Html Msg
+olsRawDataView xi yi =
+    let
+        ols = Stat.olsRawData xi yi
+        b = String.fromFloat (Maybe.withDefault 0 (Dict.get "b" ols))
+        a = String.fromFloat (Maybe.withDefault 0 (Dict.get "a" ols))
+        r2 = String.fromFloat (Maybe.withDefault 0 (Dict.get "r2" ols))
+        r = String.fromFloat (Maybe.withDefault 0 (Dict.get "r" ols))
+    in
+        div []
+            [ h2 [] [ text "Raw data の場合の最小2乗法" ]
+            , ul []
+                [ li [] [ text ("勾配 = " ++ b ) ]
+                , li [] [ text ("定数項 = " ++ a )]
+                , li [] [ text ("決定係数 = " ++ r2 ) ]
+                , li [] [ text ("相関係数 = " ++ r ) ]
+                ]
+            ]
+
+
+olsClassifiedDataView: List Float -> List Float -> List Float -> Html Msg
+olsClassifiedDataView xi yi f = 
+    let
+        ols = Stat.olsClassifiedData xi yi f
+        b = String.fromFloat (Maybe.withDefault 0 (Dict.get "b" ols))
+        a = String.fromFloat (Maybe.withDefault 0 (Dict.get "a" ols))
+        r2 = String.fromFloat (Maybe.withDefault 0 (Dict.get "r2" ols))
+        r = String.fromFloat (Maybe.withDefault 0 (Dict.get "r" ols))
+    in
+        div []
+            [ h2 [] [ text "Classified data の場合の最小2乗法" ]
+            , ul []
+                [ li [] [ text ("勾配 = " ++ b ) ]
+                , li [] [ text ("定数項 = " ++ a )]
+                , li [] [ text ("決定係数 = " ++ r2 ) ]
+                , li [] [ text ("相関係数 = " ++ r ) ]
+                ]
+            ]
+        
