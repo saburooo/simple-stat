@@ -21,9 +21,19 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 
 import Dict exposing (Dict)
+import List
 import Html.Events exposing (onClick)
 import TypedSvg exposing (line, svg)
-import TypedSvg.Attributes exposing (accelerate)
+import TypedSvg.Attributes exposing (accentHeight)
+import TypedSvg.Attributes exposing (viewBox)
+import TypedSvg.Attributes exposing (x, y)
+import TypedSvg.Attributes exposing (r)
+
+import TypedSvg exposing (rect)
+import TypedSvg.Types exposing (px)
+import TypedSvg.Core exposing (Svg)
+import TypedSvg.Attributes exposing (fill)
+import Color
 
 
 -- MAIN
@@ -315,10 +325,12 @@ regressionView xi yi f =
 -- SVG
 listVisualizeArgOne: String -> (List Float -> List Float) -> Html Msg
 listVisualizeArgOne model function =
-  let
-      floatList = function <| stringToListFloat model
-      attributedList = List.map (\s -> accelerate s) floatList
-  in
-      svg
-      [ ]
-      [ line attributedList [] ]
+    let
+        floatList = function <| stringToListFloat model
+        maxi = round (Maybe.withDefault 100 (List.maximum floatList) * 100)
+        mini = round (Maybe.withDefault 100 (List.minimum floatList) * 100)
+    in
+        svg [ viewBox 0 0 800 600 ]
+            [ rect [ x (px 0), y (px 150), width 60, height maxi, fill (TypedSvg.Types.Paint Color.blue) ] []
+            , rect [ x (px 80), y (px 150), width 60, height mini, fill (TypedSvg.Types.Paint Color.blue) ] []
+            ]
