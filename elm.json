@@ -13,9 +13,9 @@
             "elm/html": "1.0.0",
             "elm/http": "2.0.0",
             "elm/url": "1.0.0",
+            "elm-community/typed-svg": "6.0.0",
             "elm-explorations/test": "1.2.2",
-            "myrho/elm-round": "1.0.4",
-            "terezka/line-charts": "2.0.1"
+            "myrho/elm-round": "1.0.4"
         },
         "indirect": {
             "avh4/elm-color": "1.0.0",

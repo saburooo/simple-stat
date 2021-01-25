@@ -22,7 +22,8 @@ import Html.Events exposing (onInput)
 
 import Dict exposing (Dict)
 import Html.Events exposing (onClick)
-import Debug exposing (todo)
+import TypedSvg exposing (line, svg)
+import TypedSvg.Attributes exposing (accelerate)
 
 
 -- MAIN
@@ -133,6 +134,10 @@ listFloatToString listFloat =
 
 -- TODO 入力された値をリストにするのはいいとして果たしてそれがうまく行くのか
 
+dictInFloatToString: Dict String Float -> String -> Float
+dictInFloatToString dictFS str =
+  Maybe.withDefault 0 (Dict.get str dictFS)
+
 
 -- SUBSCRIPTIONS
 
@@ -153,7 +158,7 @@ view model =
         [
             div [ class "columns" ]
             [
-                div [ class "column is-one-thirds" ] 
+                div [ class "column is-one-thirds" ]
                 [ h1 [ class "title"] [ text "メニューです" ]
                     , ul [ class "" ]
                         [ buttonLink TopPage "平均値"
@@ -182,6 +187,7 @@ topView model =
                 div [] [ h1 [ class "title" ] [ text "平均値、変動係数、標準偏差、偏差" ]
                         , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
                         , br [] []
+                        , listVisualizeArgOne model.listOne Stat.deviation
                         , oneValueView model.listOne "入力された値の平均値は" Stat.average
                         , oneValueView model.listOne "入力された値の変動係数は" Stat.coefficientOfVariation
                         , oneValueView model.listOne "入力された値の標準偏差は" Stat.standardDeviation
@@ -191,7 +197,7 @@ topView model =
 
             Ols ->
                 div []
-                [ h1 [ class "title" ] [ text "工事中" ]
+                [ h1 [ class "title" ] [ text "最小二乗法" ]
                 , p [] [ text "リストその１" ]
                 , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
                 , p [] [ text "リストその２" ]
@@ -203,7 +209,16 @@ topView model =
                 ]
 
             Regres ->
-                Debug.todo "回帰分析専用ページを設ける。"
+                div []
+                [ h1 [ class "title" ] [ text "最小二乗法" ]
+                , p [] [ text "リストその１" ]
+                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
+                , p [] [ text "リストその２" ]
+                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listTwo, onInput TwoList ] []
+                , p [] [ text "リストその３" ]
+                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listThree, onInput ThreeList ] []
+                , regressionView one two three
+                ]
 
 
 {-|
@@ -240,38 +255,70 @@ olsRawDataView: List Float -> List Float -> Html Msg
 olsRawDataView xi yi =
     let
         ols = Stat.olsRawData xi yi
-        b = String.fromFloat (Maybe.withDefault 0 (Dict.get "b" ols))
-        a = String.fromFloat (Maybe.withDefault 0 (Dict.get "a" ols))
-        r2 = String.fromFloat (Maybe.withDefault 0 (Dict.get "r2" ols))
-        r = String.fromFloat (Maybe.withDefault 0 (Dict.get "r" ols))
+        b = dictInFloatToString ols "b"
+        a = dictInFloatToString ols "a"
+        r2 = dictInFloatToString ols "r2"
+        r = dictInFloatToString ols "r"
     in
         div []
             [ h2 [] [ text "Raw data の場合の最小2乗法" ]
             , ul []
-                [ li [] [ text ("勾配 = " ++ b ) ]
-                , li [] [ text ("定数項 = " ++ a )]
-                , li [] [ text ("決定係数 = " ++ r2 ) ]
-                , li [] [ text ("相関係数 = " ++ r ) ]
+                [ li [] [ text ("勾配 = " ++ (String.fromFloat b) ) ]
+                , li [] [ text ("定数項 = " ++ (String.fromFloat a) )]
+                , li [] [ text ("決定係数 = " ++ (String.fromFloat r2 )) ]
+                , li [] [ text ("相関係数 = " ++ (String.fromFloat r )) ]
                 ]
             ]
 
 
 olsClassifiedDataView: List Float -> List Float -> List Float -> Html Msg
-olsClassifiedDataView xi yi f = 
+olsClassifiedDataView xi yi f =
     let
         ols = Stat.olsClassifiedData xi yi f
-        b = String.fromFloat (Maybe.withDefault 0 (Dict.get "b" ols))
-        a = String.fromFloat (Maybe.withDefault 0 (Dict.get "a" ols))
-        r2 = String.fromFloat (Maybe.withDefault 0 (Dict.get "r2" ols))
-        r = String.fromFloat (Maybe.withDefault 0 (Dict.get "r" ols))
+        b = dictInFloatToString ols "b"
+        a =  dictInFloatToString ols "a"
+        r2 = dictInFloatToString ols "r2"
+        r = dictInFloatToString ols "r"
     in
         div []
             [ h2 [] [ text "Classified data の場合の最小2乗法" ]
             , ul []
-                [ li [] [ text ("勾配 = " ++ b ) ]
-                , li [] [ text ("定数項 = " ++ a )]
-                , li [] [ text ("決定係数 = " ++ r2 ) ]
-                , li [] [ text ("相関係数 = " ++ r ) ]
+                [ li [] [ text ("勾配 = " ++ (String.fromFloat b) ) ]
+                , li [] [ text ("定数項 = " ++ (String.fromFloat a) )]
+                , li [] [ text ("決定係数 = " ++ (String.fromFloat r2 ) ) ]
+                , li [] [ text ("相関係数 = " ++ (String.fromFloat r ) ) ]
                 ]
             ]
-        
+
+regressionView: List Float ->  List Float ->  List Float -> Html Msg
+regressionView xi yi f =
+  let
+      regression = Stat.regressionAnalysisRaw xi yi
+      b = dictInFloatToString regression "b"
+      a = dictInFloatToString regression "a"
+      r = dictInFloatToString regression "r"
+      ta = dictInFloatToString regression "ta"
+      tb = dictInFloatToString regression "tb"
+  in
+        div []
+            [ h2 [] [ text "回帰分析のコーナー" ]
+            , ul []
+                [ li [] [ text ("勾配 = " ++ String.fromFloat b ) ]
+                , li [] [ text ("定数項 = " ++ String.fromFloat a )]
+                , li [] [ text ("相関係数 = " ++ String.fromFloat r ) ]
+                , li [] [ text ("相関係数 = " ++ String.fromFloat ta ) ]
+                , li [] [ text ("相関係数 = " ++ String.fromFloat tb ) ]
+                ]
+            ]
+
+
+-- SVG
+listVisualizeArgOne: String -> (List Float -> List Float) -> Html Msg
+listVisualizeArgOne model function =
+  let
+      floatList = function <| stringToListFloat model
+      attributedList = List.map (\s -> accelerate s) floatList
+  in
+      svg
+      [ ]
+      [ line attributedList [] ]
