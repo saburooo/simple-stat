@@ -23,17 +23,19 @@ import Html.Events exposing (onInput)
 import Dict exposing (Dict)
 import List
 import Html.Events exposing (onClick)
-import TypedSvg exposing (line, svg)
-import TypedSvg.Attributes exposing (accentHeight)
+import TypedSvg exposing ( svg)
 import TypedSvg.Attributes exposing (viewBox)
 import TypedSvg.Attributes exposing (x, y)
 import TypedSvg.Attributes exposing (r)
 
 import TypedSvg exposing (rect)
 import TypedSvg.Types exposing (px)
-import TypedSvg.Core exposing (Svg)
-import TypedSvg.Attributes exposing (fill)
+import TypedSvg.Attributes exposing (fill, points)
 import Color
+import TypedSvg exposing (polyline)
+
+import Tuple
+import TypedSvg exposing (animateMotion)
 
 
 -- MAIN
@@ -215,6 +217,7 @@ topView model =
                 , p [] [ text "リストその３" ]
                 , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listThree, onInput ThreeList ] []
                 , olsRawDataView one two
+                , br [][]
                 , olsClassifiedDataView one two three
                 ]
 
@@ -271,7 +274,8 @@ olsRawDataView xi yi =
         r = dictInFloatToString ols "r"
     in
         div []
-            [ h2 [] [ text "Raw data の場合の最小2乗法" ]
+            [ h2 [ class "subtitle" ] [ text "Raw data の場合の最小2乗法" ]
+            , svg [] []
             , ul []
                 [ li [] [ text ("勾配 = " ++ (String.fromFloat b) ) ]
                 , li [] [ text ("定数項 = " ++ (String.fromFloat a) )]
@@ -291,7 +295,8 @@ olsClassifiedDataView xi yi f =
         r = dictInFloatToString ols "r"
     in
         div []
-            [ h2 [] [ text "Classified data の場合の最小2乗法" ]
+            [ h2 [ class "subtitle" ] [ text "Classified data の場合の最小2乗法" ]
+            , svg [ ][ ]
             , ul []
                 [ li [] [ text ("勾配 = " ++ (String.fromFloat b) ) ]
                 , li [] [ text ("定数項 = " ++ (String.fromFloat a) )]
@@ -326,11 +331,8 @@ regressionView xi yi f =
 listVisualizeArgOne: String -> (List Float -> List Float) -> Html Msg
 listVisualizeArgOne model function =
     let
-        floatList = function <| stringToListFloat model
-        maxi = round (Maybe.withDefault 100 (List.maximum floatList) * 100)
-        mini = round (Maybe.withDefault 100 (List.minimum floatList) * 100)
+        floatList = List.map (\x -> x ^ 2 * 30) <| function <| stringToListFloat model
+        tupleFloatList = List.map2 Tuple.pair floatList (List.sort floatList) 
     in
         svg [ viewBox 0 0 800 600 ]
-            [ rect [ x (px 0), y (px 150), width 60, height maxi, fill (TypedSvg.Types.Paint Color.blue) ] []
-            , rect [ x (px 80), y (px 150), width 60, height mini, fill (TypedSvg.Types.Paint Color.blue) ] []
-            ]
+            [ polyline [ points tupleFloatList , fill (TypedSvg.Types.Paint Color.blue) ] [] ]
