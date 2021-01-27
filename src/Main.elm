@@ -28,6 +28,8 @@ import TypedSvg.Attributes exposing (viewBox)
 import TypedSvg.Attributes exposing (x, y)
 import TypedSvg.Attributes exposing (r)
 
+import Svg exposing (Svg)
+
 import TypedSvg exposing (rect)
 import TypedSvg.Types exposing (px)
 import TypedSvg.Attributes exposing (fill, points)
@@ -328,11 +330,11 @@ regressionView xi yi f =
 
 
 -- SVG
-listVisualizeArgOne: String -> (List Float -> List Float) -> Html Msg
+listVisualizeArgOne: String -> (List Float -> List Float) -> Svg Msg
 listVisualizeArgOne model function =
     let
         floatList = List.map (\x -> x ^ 2 * 30) <| function <| stringToListFloat model
-        tupleFloatList = List.map2 Tuple.pair floatList (List.sort floatList) 
+        tupleFloatList = List.map2 Tuple.pair floatList (List.sort floatList)
     in
         svg [ viewBox 0 0 800 600 ]
             [ polyline [ points tupleFloatList , fill (TypedSvg.Types.Paint Color.blue) ] [] ]

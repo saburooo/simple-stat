@@ -109,7 +109,14 @@ shapeRetio averageProfitability contryYield sD =
 -}
 shapeRetioList : List Float -> List Float
 shapeRetioList dataList =
-    List.map (\data -> shapeRetio data (average dataList) (standardDeviation dataList) ) dataList
+    let
+        result = List.map (\data -> shapeRetio data (average dataList) (standardDeviation dataList) ) dataList
+        a = average result
+    in
+      if isNaN a then
+          []
+      else
+          result
 
 
 {- 仮説検定の英訳、もっといい英訳があるかもしれない
