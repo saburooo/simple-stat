@@ -221,7 +221,6 @@ hypothesisTest =
                     n = 100
                     aveRage = 198
                     -- TODO 有意水準の臨界値を求める関数を求める。
-                    cz = 1.645
                 in
                     Expect.true "従来より長くなった" (hypothesisForAlpha mu sigma n aveRage)
         , test "母標準偏差αがわからん場合の仮説検定(標本がすくない場合）" <|

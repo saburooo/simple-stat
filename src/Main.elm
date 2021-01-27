@@ -23,21 +23,7 @@ import Html.Events exposing (onInput)
 import Dict exposing (Dict)
 import List
 import Html.Events exposing (onClick)
-import TypedSvg exposing ( svg)
-import TypedSvg.Attributes exposing (viewBox)
-import TypedSvg.Attributes exposing (x, y)
-import TypedSvg.Attributes exposing (r)
-
-import Svg exposing (Svg)
-
-import TypedSvg exposing (rect)
-import TypedSvg.Types exposing (px)
-import TypedSvg.Attributes exposing (fill, points)
-import Color
-import TypedSvg exposing (polyline)
-
-import Tuple
-import TypedSvg exposing (animateMotion)
+import Chart
 
 
 -- MAIN
@@ -201,7 +187,7 @@ topView model =
                 div [] [ h1 [ class "title" ] [ text "平均値、変動係数、標準偏差、偏差" ]
                         , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
                         , br [] []
-                        , listVisualizeArgOne model.listOne Stat.deviation
+                        , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.deviation)
                         , oneValueView model.listOne "入力された値の平均値は" Stat.average
                         , oneValueView model.listOne "入力された値の変動係数は" Stat.coefficientOfVariation
                         , oneValueView model.listOne "入力された値の標準偏差は" Stat.standardDeviation
@@ -277,7 +263,6 @@ olsRawDataView xi yi =
     in
         div []
             [ h2 [ class "subtitle" ] [ text "Raw data の場合の最小2乗法" ]
-            , svg [] []
             , ul []
                 [ li [] [ text ("勾配 = " ++ (String.fromFloat b) ) ]
                 , li [] [ text ("定数項 = " ++ (String.fromFloat a) )]
@@ -298,7 +283,6 @@ olsClassifiedDataView xi yi f =
     in
         div []
             [ h2 [ class "subtitle" ] [ text "Classified data の場合の最小2乗法" ]
-            , svg [ ][ ]
             , ul []
                 [ li [] [ text ("勾配 = " ++ (String.fromFloat b) ) ]
                 , li [] [ text ("定数項 = " ++ (String.fromFloat a) )]
@@ -328,13 +312,3 @@ regressionView xi yi f =
                 ]
             ]
 
-
--- SVG
-listVisualizeArgOne: String -> (List Float -> List Float) -> Svg Msg
-listVisualizeArgOne model function =
-    let
-        floatList = List.map (\x -> x ^ 2 * 30) <| function <| stringToListFloat model
-        tupleFloatList = List.map2 Tuple.pair floatList (List.sort floatList)
-    in
-        svg [ viewBox 0 0 800 600 ]
-            [ polyline [ points tupleFloatList , fill (TypedSvg.Types.Paint Color.blue) ] [] ]
