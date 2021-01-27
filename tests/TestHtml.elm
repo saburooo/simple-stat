@@ -41,7 +41,6 @@ stringTest =
           \randomString ->
             randomString
               |> stringToListFloat
-              |> Debug.log "output"
               |> Expect.atLeast []
         , test "しっかり文字列をFloat入リストに変換" <|
           \_ ->

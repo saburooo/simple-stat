@@ -7,7 +7,9 @@ import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, m
 
 import Test exposing (Test, describe, test, todo)
 import Stat exposing (coefficientOfVariation, standardNormalV)
-import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData )
+import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData, shapeRetioList )
+import Test exposing (fuzz)
+import Fuzz exposing (float)
 
 
 calcuTest : Test
@@ -75,6 +77,14 @@ calcuTest =
                             3.0
                     in
                     0.44 |> within (Expect.Absolute 0.01) (shapeRetio avarage kokusai sD)
+            , fuzz (Fuzz.list float) "平均値が０になり、S.D.が１になるリストを作る関数" <|
+                \listFloat ->
+                    listFloat
+                        |> Debug.log "input"
+                        |> shapeRetioList
+                        |> average
+                        |> Debug.log "output"
+                        |> Expect.equal 0
             , test "不等式で正規分布を表示" <|
                 \_ ->
                     let

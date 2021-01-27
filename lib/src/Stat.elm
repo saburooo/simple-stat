@@ -104,6 +104,13 @@ shapeRetio averageProfitability contryYield sD =
     (averageProfitability - contryYield) / sD
 
 
+{- シャープレシオをリストで求めるようにしたら
+返されたリストで平均値を求めると０に、S.D.は１になる。
+-}
+shapeRetioList : List Float -> List Float
+shapeRetioList dataList =
+    List.map (\data -> shapeRetio data (average dataList) (standardDeviation dataList) ) dataList
+
 
 {- 仮説検定の英訳、もっといい英訳があるかもしれない
 
