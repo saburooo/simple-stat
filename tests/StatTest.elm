@@ -84,7 +84,7 @@ calcuTest =
                         |> shapeRetioList
                         |> average
                         |> Debug.log "output"
-                        |> Expect.equal 0
+                        |> within (Expect.Absolute 0.001) 0
             , test "不等式で正規分布を表示" <|
                 \_ ->
                     let

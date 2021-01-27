@@ -1,6 +1,4 @@
 elm-stuff
 node_modules/
-package.json
-package-lock.json
 dist
 .cache
