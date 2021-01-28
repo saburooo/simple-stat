@@ -187,11 +187,15 @@ topView model =
                 div [] [ h1 [ class "title" ] [ text "平均値、変動係数、標準偏差、偏差" ]
                         , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
                         , br [] []
-                        , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.deviation)
+                        , manyValueView model.listOne "入力された値のシャープレシオをグラフで示すと↓数値は" Stat.shapeRetioList
+                        , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.shapeRetioList)
                         , oneValueView model.listOne "入力された値の平均値は" Stat.average
                         , oneValueView model.listOne "入力された値の変動係数は" Stat.coefficientOfVariation
                         , oneValueView model.listOne "入力された値の標準偏差は" Stat.standardDeviation
-                        , manyValueView model.listOne "入力された値の偏差は" Stat.deviation
+                        , manyValueView model.listOne "入力された値の偏差は：" Stat.deviation
+                        , div [] [ text "偏差をグラフで示すと"
+                                 , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.deviation)
+                                 ]
                         , fiducialView (Stat.fiducialInterval (toFloat (List.length (one) )) (Stat.standardDeviation (one)))
                     ]
 
@@ -311,4 +315,3 @@ regressionView xi yi f =
                 , li [] [ text ("相関係数 = " ++ String.fromFloat tb ) ]
                 ]
             ]
-
