@@ -586,10 +586,11 @@ hypothesisForAlpha mu sigma n aveRage =
 
 {-| hypothesisNotAlpha
 母標準偏差αがわからん場合の仮説検定
-例題:標本が20で標本平均が
+例題:標本が20で標本平均が１９８時間の電池があった
+その標本標準偏差は15である。
 -}
-hypothesisNotAlpha : Float -> Int -> Float -> Float -> Float -> Bool
-hypothesisNotAlpha mu n xi s _ =
+hypothesisNotAlpha : Float -> Int -> Float -> Float -> Bool
+hypothesisNotAlpha mu n xi s =
     let
         ct =
             tDistIntentionalLevelFivePer (n - 1)

@@ -224,10 +224,10 @@ hypothesisTest =
                     Expect.true "従来より長くなった" (hypothesisForAlpha mu sigma n aveRage)
         , test "母標準偏差αがわからん場合の仮説検定(標本がすくない場合）" <|
             \_ ->
-                Expect.true "優位に長い" (hypothesisNotAlpha 180 20 198 15 0.05)
+                Expect.true "優位に長い" (hypothesisNotAlpha 180 20 198 15)
         , test "母標準偏差αがわからん場合の仮説検定(標本が多い場合）" <|
             \_ ->
-                Expect.true "優位に長い" (hypothesisNotAlpha 180 100 181 5 0.05)
+                Expect.true "優位に長い" (hypothesisNotAlpha 180 100 181 5)
         ]
 
 

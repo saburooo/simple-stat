@@ -55,6 +55,7 @@ type Route
     | Regres
     | Dist
     | Parcen
+    | Hypo
 
 
 init : () -> ( Model, Cmd Msg)
@@ -74,6 +75,7 @@ type Msg
     | Regression
     | Distribution
     | Parcentage
+    | Hypothesis
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -116,6 +118,11 @@ update msg model =
 
         Parcentage ->
             ( { model | route = Parcen }
+            , Cmd.none
+            )
+
+        Hypothesis ->
+            ( { model | route = Hypo }
             , Cmd.none
             )
 
@@ -193,6 +200,7 @@ view model =
                         , buttonLink OLS "OLS最小二乗法"
                         , buttonLink Regression "回帰分析"
                         , buttonLink Distribution "二項分布・ポアソン分布"
+                        , buttonLink Hypothesis "仮説検定"
                     ]
                 ]
                 , div [ class "column is-two-thirds" ]
@@ -266,6 +274,14 @@ topView model =
                 , parcentageView oneInt twoInt
                 , inputView "どれくらいものがあるのか" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
                 , inputView "その中からいくつ持ってくのか" ", 間隔で数字を入力してね。上の数からどれくらい持っていく？" model.listTwo TwoList
+                ]
+
+            Hypo ->
+                div []
+                [ h1 [ class "title" ] [text "仮説検定" ]
+                , inputView "仮説検定するサンプルを入力してください" "これをもとに仮説検定していきます" model.listOne OneList
+                , inputView "仮説検定する値を入力してください" "入力した値とサンプルを比較して正しいかどうか調べます。" model.listTwo TwoList
+                , hypoView one (List.sum two)
                 ]
 
 
@@ -377,3 +393,33 @@ parcentageView oneInt twoInt =
         , li [] [ text ("組み合わせです" ++ String.fromInt (Stat.combination oneInt twoInt)) ]
         ]
     ]
+
+
+hypoView: List Float -> Float -> Html Msg
+hypoView listFloat sample = 
+    let
+        sCount = List.length listFloat
+        sAverage = Stat.average listFloat
+        sDeviation = Stat.standardDeviation listFloat
+        notAlpha = Stat.hypothesisNotAlpha sAverage sCount sample sDeviation 
+    in
+        div []
+        [ h2 [] [ text "この仮説は有効であるか否か・・・" ]
+        , ul []
+            [ li [] [ text ("標本平均は" ++ String.fromFloat sAverage) ]
+            , li [] [ text ("サンプルの数は" ++ String.fromInt sCount) ]
+            ]
+        , p [] [ text ("仮説として登場した数" ++ String.fromFloat sample ++ "は棄却域なのか") ]
+        ,  if notAlpha == True then
+            div []
+            [ p [] [ text ("帰無仮説として登場した μ = " ++ String.fromFloat sample ++ "は棄却されないため") ]
+            , p [] [ text ("対立仮説として登場した μ > " ++ String.fromFloat sample ++ "は採択される。")]
+            , p [] [ text "つまり棄却できない。"]
+            ]
+         else
+            div []
+            [ p [] [ text ("帰無仮説として登場した μ = " ++ String.fromFloat sample ++ "は棄却できないので") ]
+            , p [] [ text ("対立仮説として登場した μ > " ++ String.fromFloat sample ++ "は採択されない。")]
+            , p [] [ text "採択できない。"]
+            ]
+        ]
