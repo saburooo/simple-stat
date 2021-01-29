@@ -505,8 +505,9 @@ popStandardD s n cc =
 
 
 {-| factorial
-階乗計算で再帰で実装する典型的な計算式です。
-
+階乗計算を再帰で実装する典型的な計算式です。
+サンプルコードは５人いて彼らが整列をする時、
+その並び方は何通りあるか求められます。
     factorial 5
 
     OUT 120
@@ -523,7 +524,7 @@ factorial n =
 
 
 {-| permutation
-順列
+順列計算、これは４人いてそのうち２人が整列するときの並び方の数
 
     permutation 4 2
 
@@ -536,7 +537,7 @@ permutation n m =
 
 
 {-| combination
-組み合わせ
+組み合わせ、この例だと１０人中３人が順序関係なく選ばれた場合の組み合わせの数
 
     combination 10 3
 

@@ -53,6 +53,8 @@ type Route
     = Top
     | Ols
     | Regres
+    | Dist
+    | Parcen
 
 
 init : () -> ( Model, Cmd Msg)
@@ -70,6 +72,8 @@ type Msg
     | TopPage
     | OLS
     | Regression
+    | Distribution
+    | Parcentage
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -105,6 +109,19 @@ update msg model =
             , Cmd.none
             )
 
+        Distribution ->
+            ( { model | route = Dist }
+            , Cmd.none
+            )
+
+        Parcentage ->
+            ( { model | route = Parcen }
+            , Cmd.none
+            )
+
+
+-- Utility
+
 
 {-|
   stringToListFloat "1,2,3,4,5"
@@ -139,6 +156,16 @@ dictInFloatToString dictFS str =
   Maybe.withDefault 0 (Dict.get str dictFS)
 
 
+strToInt: String -> Int
+strToInt str =
+    let
+        splited = String.split "," str
+        castedInt = List.map (\s -> Maybe.withDefault 0 (String.toInt s)) splited
+    in
+        List.sum castedInt
+    
+
+
 -- SUBSCRIPTIONS
 
 
@@ -152,7 +179,7 @@ subscriptions _ =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "オレオレ統計ライブラリーデモ"
+    { title = "オレの統計ライブラリーデモ"
     , body =
         -- 一番上にリンクを貼ってなんとかする。
         [
@@ -162,8 +189,10 @@ view model =
                 [ h1 [ class "title"] [ text "メニューです" ]
                     , ul [ class "" ]
                         [ buttonLink TopPage "平均値"
+                        , buttonLink Parcentage "確率"
                         , buttonLink OLS "OLS最小二乗法"
                         , buttonLink Regression "回帰分析"
+                        , buttonLink Distribution "二項分布・ポアソン分布"
                     ]
                 ]
                 , div [ class "column is-two-thirds" ]
@@ -181,12 +210,13 @@ topView model =
         one = stringToListFloat model.listOne
         two = stringToListFloat model.listTwo
         three = stringToListFloat model.listThree
+        oneInt = strToInt model.listOne
+        twoInt = strToInt model.listTwo
     in
         case model.route of
             Top ->
                 div [] [ h1 [ class "title" ] [ text "平均値、変動係数、標準偏差、偏差" ]
-                        , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
-                        , br [] []
+                        , inputView "下の入力欄に数字を入れてね" ", 間隔で数字を入力してね。" model.listOne OneList
                         , manyValueView model.listOne "入力された値のシャープレシオをグラフで示すと↓数値は" Stat.shapeRetioList
                         , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.shapeRetioList)
                         , oneValueView model.listOne "入力された値の平均値は" Stat.average
@@ -202,12 +232,10 @@ topView model =
             Ols ->
                 div []
                 [ h1 [ class "title" ] [ text "最小二乗法" ]
-                , p [] [ text "リストその１" ]
-                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
-                , p [] [ text "リストその２" ]
-                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listTwo, onInput TwoList ] []
-                , p [] [ text "リストその３" ]
-                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listThree, onInput ThreeList ] []
+                , inputView "リストその１" ", 間隔で数字を入力してね。" model.listOne OneList
+                , inputView "リストその２" ", 間隔で数字を入力してね。" model.listTwo TwoList
+                , inputView "リストその３" ", 間隔で数字を入力してね。" model.listThree ThreeList
+                , br [][]
                 , olsRawDataView one two
                 , br [][]
                 , olsClassifiedDataView one two three
@@ -215,15 +243,42 @@ topView model =
 
             Regres ->
                 div []
-                [ h1 [ class "title" ] [ text "最小二乗法" ]
-                , p [] [ text "リストその１" ]
-                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listOne, onInput OneList ] []
-                , p [] [ text "リストその２" ]
-                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listTwo, onInput TwoList ] []
-                , p [] [ text "リストその３" ]
-                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listThree, onInput ThreeList ] []
+                [ h1 [ class "title" ] [ text "回帰分析" ]
                 , regressionView one two three
+                , inputView "リストその１" ", 間隔で数字を入力してね。" model.listOne OneList
+                , inputView "リストその２" ", 間隔で数字を入力してね。" model.listTwo TwoList
+                {-, p [] [ text "リストその３" ]
+                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listThree, onInput ThreeList ] []
+                -}
                 ]
+
+            Dist ->
+                div []
+                [ h1 [ class "title" ] [text "二項分布・ポアソン分布" ]
+                , inputView "リストその１" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
+                , p [] [ text "二項分布をしてみたら" ]
+                , p [] [ text "ポアソン分布" ]
+                ]
+
+            Parcen ->
+                div []
+                [ h1 [ class "title" ] [text "確率計算" ]
+                , parcentageView oneInt twoInt
+                , inputView "どれくらいものがあるのか" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
+                , inputView "その中からいくつ持ってくのか" ", 間隔で数字を入力してね。上の数からどれくらい持っていく？" model.listTwo TwoList
+                ]
+
+
+buttonLink: Msg -> String -> Html Msg
+buttonLink msg str =
+    li [] [ a [ class "button is-link is-outlined is-small is-fullwidth", onClick msg ] [ text str ] ]
+
+
+inputView: String -> String -> String -> (String -> Msg) -> Html Msg
+inputView pText inputValue model msg =
+    div [] [ p [] [ text pText ]
+           , input [ class "input", placeholder inputValue, value model, onInput msg ] []
+        ]
 
 
 {-|
@@ -249,11 +304,6 @@ fiducialView fiducialDict =
       maxi = (String.fromFloat <| roundNum 4 <| Maybe.withDefault 0 (Dict.get "max" fiducialDict))
   in
     div [] [ text ("信頼区間の...最小値は" ++ mini ++ "で最大値は" ++ maxi) ]
-
-
-buttonLink: Msg -> String -> Html Msg
-buttonLink msg str =
-    li [] [ a [ class "button is-link is-outlined is-small is-fullwidth", onClick msg ] [ text str ] ]
 
 
 olsRawDataView: List Float -> List Float -> Html Msg
@@ -296,7 +346,7 @@ olsClassifiedDataView xi yi f =
             ]
 
 regressionView: List Float ->  List Float ->  List Float -> Html Msg
-regressionView xi yi f =
+regressionView xi yi _ =
   let
       regression = Stat.regressionAnalysisRaw xi yi
       b = dictInFloatToString regression "b"
@@ -306,12 +356,24 @@ regressionView xi yi f =
       tb = dictInFloatToString regression "tb"
   in
         div []
-            [ h2 [] [ text "回帰分析のコーナー" ]
-            , ul []
-                [ li [] [ text ("勾配 = " ++ String.fromFloat b ) ]
-                , li [] [ text ("定数項 = " ++ String.fromFloat a )]
-                , li [] [ text ("相関係数 = " ++ String.fromFloat r ) ]
-                , li [] [ text ("相関係数 = " ++ String.fromFloat ta ) ]
-                , li [] [ text ("相関係数 = " ++ String.fromFloat tb ) ]
+            [ h2 [ class "subtitle" ] [ text "回帰分析した結果↓" ]
+            , ul [ class "" ]
+                [ li [ class "" ] [ text ("勾配 = " ++ String.fromFloat b ) ]
+                , li [ class "" ] [ text ("定数項 = " ++ String.fromFloat a )]
+                , li [ class "" ] [ text ("相関係数 = " ++ String.fromFloat r ) ]
+                , li [ class "" ] [ text ("回帰係数a = " ++ String.fromFloat ta ) ]
+                , li [ class "" ] [ text ("回帰係数b = " ++ String.fromFloat tb ) ]
                 ]
             ]
+
+
+parcentageView: Int -> Int -> Html Msg
+parcentageView oneInt twoInt =
+    div []
+    [ ul []
+        [ li [] [ text ("リストの合計" ++ String.fromInt oneInt) ]
+        , li [] [ text ("階乗計算じゃよ" ++ String.fromInt (Stat.factorial oneInt)) ]
+        , li [] [ text ("順列なのだよ" ++ String.fromInt (Stat.permutation oneInt twoInt)) ]
+        , li [] [ text ("組み合わせです" ++ String.fromInt (Stat.combination oneInt twoInt)) ]
+        ]
+    ]

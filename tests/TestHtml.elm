@@ -48,7 +48,7 @@ stringTest =
         ]
         , test "今度はList Floatを文字列に変換" <|
           \_ ->
-            equal "1.5,2.5,3.5,4.5,5.3" (listFloatToString [1.5,2.5,3.5,4.5,5.3])
+            equal "1.5, 2.5, 3.5, 4.5, 5.3" (listFloatToString [1.5,2.5,3.5,4.5,5.3])
       ]
 
 

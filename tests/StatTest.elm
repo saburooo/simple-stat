@@ -80,7 +80,6 @@ calcuTest =
             , fuzz (Fuzz.list float) "平均値が０になり、S.D.が１になるリストを作る関数" <|
                 \listFloat ->
                     listFloat
-                        |> Debug.log "input"
                         |> shapeRetioList
                         |> average
                         |> Debug.log "output"
