@@ -193,16 +193,18 @@ view model =
         [
             div [ class "columns" ]
             [
-                div [ class "column is-one-thirds" ]
-                [ h1 [ class "title"] [ text "メニューです" ]
-                    , ul [ class "" ]
-                        [ buttonLink TopPage "平均値"
-                        , buttonLink Parcentage "確率"
-                        , buttonLink OLS "OLS最小二乗法"
-                        , buttonLink Regression "回帰分析"
-                        , buttonLink Distribution "二項分布・ポアソン分布"
-                        , buttonLink Hypothesis "仮説検定"
-                    ]
+                div [ class "column is-one-thirds panel is-info" ]
+                [ h1 [ class "title panel-heading"] [ text "メニューです" ]
+                    , nav [ class "" ] 
+                        [ ul [ class "panel-headering" ]
+                            [ buttonLink TopPage "平均値"
+                            , buttonLink Parcentage "確率"
+                            , buttonLink OLS "OLS最小二乗法"
+                            , buttonLink Regression "回帰分析"
+                            , buttonLink Distribution "二項分布・ポアソン分布"
+                            , buttonLink Hypothesis "仮説検定"
+                            ]
+                        ]
                 ]
                 , div [ class "column is-two-thirds" ]
                     [ topView model
@@ -224,23 +226,26 @@ topView model =
     in
         case model.route of
             Top ->
-                div [] [ h1 [ class "title" ] [ text "平均値、変動係数、標準偏差、偏差" ]
+                div [ class "message is-large" ]
+                    [ h1 [ class "title message-header" ] [ text "平均値、変動係数、標準偏差、偏差" ]
                         , inputView "下の入力欄に数字を入れてね" ", 間隔で数字を入力してね。" model.listOne OneList
-                        , manyValueView model.listOne "入力された値のシャープレシオをグラフで示すと↓数値は" Stat.shapeRetioList
-                        , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.shapeRetioList)
+                        , manyValueView model.listOne "入力された値のシャープレシオを示した数値は" Stat.shapeRetioList
+                        --, Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.shapeRetioList)
                         , oneValueView model.listOne "入力された値の平均値は" Stat.average
                         , oneValueView model.listOne "入力された値の変動係数は" Stat.coefficientOfVariation
                         , oneValueView model.listOne "入力された値の標準偏差は" Stat.standardDeviation
                         , manyValueView model.listOne "入力された値の偏差は：" Stat.deviation
+                        {-
                         , div [] [ text "偏差をグラフで示すと"
                                  , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.deviation)
                                  ]
+                        -}
                         , fiducialView (Stat.fiducialInterval (toFloat (List.length (one) )) (Stat.standardDeviation (one)))
                     ]
 
             Ols ->
-                div []
-                [ h1 [ class "title" ] [ text "最小二乗法" ]
+                div [ class "message is-large" ]
+                [ h1 [ class "title message-header" ] [ text "最小二乗法" ]
                 , inputView "リストその１" ", 間隔で数字を入力してね。" model.listOne OneList
                 , inputView "リストその２" ", 間隔で数字を入力してね。" model.listTwo TwoList
                 , inputView "リストその３" ", 間隔で数字を入力してね。" model.listThree ThreeList
@@ -251,8 +256,8 @@ topView model =
                 ]
 
             Regres ->
-                div []
-                [ h1 [ class "title" ] [ text "回帰分析" ]
+                div [ class "message is-large" ]
+                [ h1 [ class "title message-header" ] [ text "回帰分析" ]
                 , regressionView one two three
                 , inputView "リストその１" ", 間隔で数字を入力してね。" model.listOne OneList
                 , inputView "リストその２" ", 間隔で数字を入力してね。" model.listTwo TwoList
@@ -262,24 +267,32 @@ topView model =
                 ]
 
             Dist ->
-                div []
-                [ h1 [ class "title" ] [text "二項分布・ポアソン分布" ]
+                div [ class "message is-large" ]
+                [ h1 [ class "title message-header" ] [text "二項分布・ポアソン分布" ]
                 , inputView "リストその１" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
-                , p [] [ text "二項分布をしてみたら" ]
-                , p [] [ text "ポアソン分布" ]
+                , div [] 
+                    [ h2 [ class "subtitle" ] [ text "二項分布をしてみたら" ]
+                    , p [] [ text "リストで表示すると以下のとおりになる" ]
+                    , p [] [ text ( Stat.biDistribution (List.sum one) (List.length one) |> listFloatToString ) ]
+                    ]
+                , div [] 
+                    [ h2 [ class "subtitle" ] [text "ポアソン分布をしてみたら" ]
+                    , p [] [ text "リストで表示すると以下のとおりになる" ]
+                    , p [] [ text ( Stat.poisson (List.sum one) (List.length one) |> listFloatToString ) ]
+                    ]
                 ]
 
             Parcen ->
-                div []
-                [ h1 [ class "title" ] [text "確率計算" ]
+                div [ class "message is-large" ]
+                [ h1 [ class "title message-header" ] [text "確率計算" ]
                 , parcentageView oneInt twoInt
                 , inputView "どれくらいものがあるのか" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
                 , inputView "その中からいくつ持ってくのか" ", 間隔で数字を入力してね。上の数からどれくらい持っていく？" model.listTwo TwoList
                 ]
 
             Hypo ->
-                div []
-                [ h1 [ class "title" ] [text "仮説検定" ]
+                div [ class "message is-large" ]
+                [ h1 [ class "title message-header" ] [text "仮説検定" ]
                 , inputView "仮説検定するサンプルを入力してください" "これをもとに仮説検定していきます" model.listOne OneList
                 , inputView "仮説検定する値を入力してください" "入力した値とサンプルを比較して正しいかどうか調べます。" model.listTwo TwoList
                 , hypoView one (List.sum two)
@@ -288,7 +301,7 @@ topView model =
 
 buttonLink: Msg -> String -> Html Msg
 buttonLink msg str =
-    li [] [ a [ class "button is-link is-outlined is-small is-fullwidth", onClick msg ] [ text str ] ]
+    li [ class "" ] [ a [ class "panel-block button is-link is-outlined is-fullwidth", onClick msg ] [ text str ] ]
 
 
 inputView: String -> String -> String -> (String -> Msg) -> Html Msg
