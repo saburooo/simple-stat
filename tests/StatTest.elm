@@ -3,11 +3,12 @@ module StatTest exposing (..)
 import Dict
 import Expect exposing (equal, equalDicts, equalLists, greaterThan, within)
 import List
-import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, factorial, permutation,combination, biDistributionProbability, biDistribution)
+import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, biDistributionProbability, biDistribution)
 
 import Test exposing (Test, describe, test, todo)
 import Stat exposing (coefficientOfVariation, standardNormalV)
 import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData, shapeRetioList )
+import Utility exposing (factorial, permutation, combination, starJes, median)
 import Test exposing (fuzz)
 import Fuzz exposing (float)
 
@@ -120,12 +121,6 @@ calcuTest =
             , test "カイ二乗分布で求めるパーセンテージ" <|
                 \_ ->
                     0.28 |> within (Expect.Absolute 0.01) (x2Distribution 3 6)
-
-            , todo "標本分散を求める。"
-
-            -- 一つの多次元リストからランダムにちゃんと値を取り出せるか
-            , todo "無作為抽出"
-
             , test "変動係数" <|
                 \_ ->
                     0.303 |> within (Expect.Absolute 0.001) (coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ])
@@ -279,3 +274,23 @@ correlationTest =
                     Dict.fromList [ ( "a", 7.5 ), ( "b", 0.69 ), ( "ta", 4.1992 ), ( "tb", 12.813), ( "r", 0.9910 )]
                         |> equalDicts ( regressionAnalysisRaw xi yi)
         ]
+
+
+graphTest:Test
+graphTest =
+    describe "グラフを作成する時に出てくる数値はまともなものなのか" <|
+        [ test "スタージェスの公式のテスト" <|
+            \_ ->
+                let
+                    dataLength = List.range 0 64
+                    dataLengthFloated = List.map (\s -> toFloat s) dataLength
+                in
+                    equal 7 (starJes dataLengthFloated)
+        , test "メディアンを求める。(偶数編)" <|
+            \_ ->
+                2.5 |> within (Expect.Absolute 0.01) (median [1,1,1,1,2,3,4,5,16,20])
+        , test "メディアンを求める。(奇数編)" <|
+            \_ ->
+                equal 3 (median [1,2,3,4,5])
+        ]
+

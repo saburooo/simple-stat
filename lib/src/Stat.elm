@@ -17,6 +17,7 @@ import Dict exposing (Dict)
 import Html.Attributes exposing (list)
 import List exposing (length, map, sum)
 import Round exposing (roundNum)
+import Utility exposing (factorial, combination)
 
 
 {-| 算術平均、Float入Listを受け取ってFloatを返す
@@ -278,28 +279,6 @@ chiSquare sample mu sigma =
     List.sum (List.map (\s -> (s - mu) ^ 2) sample) / (sigma ^ 2)
 
 
-
--- 標本分散 自由度を求める関数とそこからカイ二乗分布を割り出す関数を何かしら実装する必要がある。
-
-
-specimenDispersion : List Float -> Float -> Float
-specimenDispersion data mu =
-    Debug.todo "カイ二乗分布をうまく求める方法を理解する。"
-
-
-
--- RANDOM
-
-
-{-| 無作為抽出
--}
-randomSampling : List (List Float) -> Int -> List Float
-randomSampling multidimensionArray sampleNumber =
-    Debug.todo "どうやって多次元配列から抜き出せばよいだろうか"
-
-
-
----------------------------------------------- 後で分割するかもしれないが、まだまだファイルは小さいのでまとめて書く ----------------------------------------------
 -- 確率
 
 
@@ -501,56 +480,6 @@ popStandardD s n cc =
 
 
 --------分布のための関数ここまで、--------------------------
-----------色々やってくれる優しい関数
-
-
-{-| factorial
-階乗計算を再帰で実装する典型的な計算式です。
-サンプルコードは５人いて彼らが整列をする時、
-その並び方は何通りあるか求められます。
-    factorial 5
-
-    OUT 120
-
--}
-factorial : Int -> Int
-factorial n =
-    case n of
-        0 ->
-            1
-
-        _ ->
-            n * factorial (n - 1)
-
-
-{-| permutation
-順列計算、これは４人いてそのうち２人が整列するときの並び方の数
-
-    permutation 4 2
-
-    OUT 12
-
--}
-permutation : Int -> Int -> Int
-permutation n m =
-    factorial n // factorial (n - m)
-
-
-{-| combination
-組み合わせ、この例だと１０人中３人が順序関係なく選ばれた場合の組み合わせの数
-
-    combination 10 3
-
-    OUT 120
-
--}
-combination : Int -> Int -> Int
-combination n m =
-    factorial n // (factorial (n - m) * factorial m)
-
-
-
-------色々やってくれる優しい関数ここまで
 
 
 -- 仮定と分析の関数

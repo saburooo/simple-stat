@@ -12,6 +12,7 @@ module Main exposing (..)
 
 
 import Stat
+import Utility
 import Browser
 
 import Round exposing (roundNum)
@@ -388,9 +389,9 @@ parcentageView oneInt twoInt =
     div []
     [ ul []
         [ li [] [ text ("リストの合計" ++ String.fromInt oneInt) ]
-        , li [] [ text ("階乗計算じゃよ" ++ String.fromInt (Stat.factorial oneInt)) ]
-        , li [] [ text ("順列なのだよ" ++ String.fromInt (Stat.permutation oneInt twoInt)) ]
-        , li [] [ text ("組み合わせです" ++ String.fromInt (Stat.combination oneInt twoInt)) ]
+        , li [] [ text ("階乗計算じゃよ" ++ String.fromInt (Utility.factorial oneInt)) ]
+        , li [] [ text ("順列なのだよ" ++ String.fromInt (Utility.permutation oneInt twoInt)) ]
+        , li [] [ text ("組み合わせです" ++ String.fromInt (Utility.combination oneInt twoInt)) ]
         ]
     ]
 
