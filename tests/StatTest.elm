@@ -8,7 +8,7 @@ import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, m
 import Test exposing (Test, describe, test, todo)
 import Stat exposing (coefficientOfVariation, standardNormalV)
 import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData, shapeRetioList )
-import Utility exposing (factorial, permutation, combination, starJes, median)
+import Utility exposing (factorial, permutation, combination, starJes, median, starling)
 import Test exposing (fuzz)
 import Fuzz exposing (float)
 
@@ -294,3 +294,11 @@ graphTest =
                 equal 3 (median [1,2,3,4,5])
         ]
 
+
+probalityTest:Test
+probalityTest =
+    describe "様々な確率の公式のテスト"
+        [ test "スターリングの公式これは階乗を指数で近似する公式のことである。" <|
+            \_ ->
+                3598695.61874 |> within (Expect.Absolute 0.001) ( starling 10 )
+        ]

@@ -1,4 +1,4 @@
-module Utility exposing (factorial, permutation, combination, starJes, median)
+module Utility exposing (factorial, permutation, combination, starJes, median, starling)
 import Html.Attributes exposing (list)
 
 
@@ -78,3 +78,13 @@ median list =
      else
         c
         
+
+{-| starling
+## スターリングの公式
+階乗計算を指数計算で近似する公式(よく似た数値を叩き出す。)
+@example starling 10
+OUT 3598695.61874
+-}
+starling:Int -> Float
+starling n =
+    logBase Basics.e (toFloat (factorial n))
