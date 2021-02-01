@@ -25,6 +25,11 @@ import Dict exposing (Dict)
 import List
 import Html.Events exposing (onClick)
 import Chart
+import Html
+import Html
+import Html
+import Html
+import Html
 
 
 -- MAIN
@@ -195,7 +200,7 @@ view model =
             [
                 div [ class "column is-one-thirds panel is-info" ]
                 [ h1 [ class "title panel-heading"] [ text "メニューです" ]
-                    , nav [ class "" ] 
+                    , nav [ class "nav" ] 
                         [ ul [ class "panel-headering" ]
                             [ buttonLink TopPage "平均値"
                             , buttonLink Parcentage "確率"
@@ -207,7 +212,7 @@ view model =
                         ]
                 ]
                 , div [ class "column is-two-thirds" ]
-                    [ topView model
+                    [ div [ class "message is-medium is-info" ] [ topView model ]
                     , br [] []
                     ]
             ]
@@ -226,25 +231,27 @@ topView model =
     in
         case model.route of
             Top ->
-                div [ class "message is-large" ]
+                div [  ]
                     [ h1 [ class "title message-header" ] [ text "平均値、変動係数、標準偏差、偏差" ]
                         , inputView "下の入力欄に数字を入れてね" ", 間隔で数字を入力してね。" model.listOne OneList
-                        , manyValueView model.listOne "入力された値のシャープレシオを示した数値は" Stat.shapeRetioList
-                        --, Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.shapeRetioList)
-                        , oneValueView model.listOne "入力された値の平均値は" Stat.average
-                        , oneValueView model.listOne "入力された値の変動係数は" Stat.coefficientOfVariation
-                        , oneValueView model.listOne "入力された値の標準偏差は" Stat.standardDeviation
-                        , manyValueView model.listOne "入力された値の偏差は：" Stat.deviation
-                        {-
-                        , div [] [ text "偏差をグラフで示すと"
-                                 , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.deviation)
-                                 ]
-                        -}
-                        , fiducialView (Stat.fiducialInterval (toFloat (List.length (one) )) (Stat.standardDeviation (one)))
+                        , Html.table [ class "table is-bordered" ] 
+                            [ Html.tr [] 
+                                [ oneValueView model.listOne "入力された値の平均値は：" Stat.average
+                                , manyValueView model.listOne "入力された値の偏差は：" Stat.deviation
+                                , oneValueView model.listOne "入力された値の標準偏差は：" Stat.standardDeviation
+                                , oneValueView model.listOne "入力された値の変動係数は：" Stat.coefficientOfVariation
+                                , manyValueView model.listOne "入力された値を標準化すると：" Stat.standartdization
+                                , div [] [ text "標準化したリストをグラフで示すと"
+                                        , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.standartdization)
+                                        ]
+                                , manyValueView model.listOne "入力された値のシャープレシオを示した数値は：" Stat.shapeRetioList
+                                , fiducialView (Stat.fiducialInterval (toFloat (List.length (one) )) (Stat.standardDeviation (one)))
+                                ]
+                            ]
                     ]
 
             Ols ->
-                div [ class "message is-large" ]
+                div [  ]
                 [ h1 [ class "title message-header" ] [ text "最小二乗法" ]
                 , inputView "リストその１" ", 間隔で数字を入力してね。" model.listOne OneList
                 , inputView "リストその２" ", 間隔で数字を入力してね。" model.listTwo TwoList
@@ -256,18 +263,15 @@ topView model =
                 ]
 
             Regres ->
-                div [ class "message is-large" ]
+                div [  ]
                 [ h1 [ class "title message-header" ] [ text "回帰分析" ]
-                , regressionView one two three
                 , inputView "リストその１" ", 間隔で数字を入力してね。" model.listOne OneList
                 , inputView "リストその２" ", 間隔で数字を入力してね。" model.listTwo TwoList
-                {-, p [] [ text "リストその３" ]
-                , input [ class "input", placeholder ", 間隔で数字を入力してね。", value model.listThree, onInput ThreeList ] []
-                -}
+                , regressionView one two three
                 ]
 
             Dist ->
-                div [ class "message is-large" ]
+                div [  ]
                 [ h1 [ class "title message-header" ] [text "二項分布・ポアソン分布" ]
                 , inputView "リストその１" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
                 , div [] 
@@ -283,15 +287,15 @@ topView model =
                 ]
 
             Parcen ->
-                div [ class "message is-large" ]
+                div [  ]
                 [ h1 [ class "title message-header" ] [text "確率計算" ]
-                , parcentageView oneInt twoInt
                 , inputView "どれくらいものがあるのか" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
                 , inputView "その中からいくつ持ってくのか" ", 間隔で数字を入力してね。上の数からどれくらい持っていく？" model.listTwo TwoList
+                , parcentageView oneInt twoInt
                 ]
 
             Hypo ->
-                div [ class "message is-large" ]
+                div [  ]
                 [ h1 [ class "title message-header" ] [text "仮説検定" ]
                 , inputView "仮説検定するサンプルを入力してください" "これをもとに仮説検定していきます" model.listOne OneList
                 , inputView "仮説検定する値を入力してください" "入力した値とサンプルを比較して正しいかどうか調べます。" model.listTwo TwoList
@@ -317,14 +321,14 @@ listFloatView model.string "何らかのメッセージ" average
 -}
 oneValueView: String -> String -> (List Float -> Float) -> Html Msg
 oneValueView listFloat strText funcL =
-    div [ class "" ] [ text <| String.append strText <| String.fromFloat <| roundNum 4 <| funcL <| stringToListFloat listFloat ]
+    div [ class "" ] [  Html.td [ class "td" ] [ text <| strText ], Html.td [] [ text <| String.fromFloat <| roundNum 4 <| funcL <| stringToListFloat listFloat ] ]
 
 
 {-| listView
 -}
 manyValueView: String -> String -> (List Float -> List Float) -> Html Msg
 manyValueView listFloat strText funcL =
-    div [] [ text <| String.append strText <| listFloatToString <| List.map (\x -> roundNum 4 x) <| funcL <| stringToListFloat listFloat ]
+    div [] [ Html.td [] [text <| strText], Html.td [] [ text <| listFloatToString <| List.map (\x -> roundNum 4 x) <| funcL <| stringToListFloat listFloat ] ]
 
 
 fiducialView: Dict String Float -> Html Msg
@@ -333,7 +337,7 @@ fiducialView fiducialDict =
       mini = (String.fromFloat <| roundNum 4 <| Maybe.withDefault 0 (Dict.get "min" fiducialDict))
       maxi = (String.fromFloat <| roundNum 4 <| Maybe.withDefault 0 (Dict.get "max" fiducialDict))
   in
-    div [] [ text ("信頼区間の...最小値は" ++ mini ++ "で最大値は" ++ maxi) ]
+    div [] [ Html.td [] [ text "信頼区間の...", text ("最小値は" ++ mini), text ("最大値は" ++ maxi) ]   ]
 
 
 olsRawDataView: List Float -> List Float -> Html Msg

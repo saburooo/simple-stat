@@ -91,6 +91,15 @@ coefficientOfVariation sampleData =
     standardDeviation sampleData / average sampleData
 
 
+{-| standartdization
+標準化、これをもとに偏差値を求めることができる
+@example standartdization [50, 70]
+    OUT [43, 57] -- roundを事前に適用
+-}
+standartdization: List Float -> List Float
+standartdization list =
+    List.map (\l -> (l - (average list)) / (standardDeviation list)) list
+
 
 {- シャープレシオ
 

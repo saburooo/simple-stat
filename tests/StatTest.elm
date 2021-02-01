@@ -11,6 +11,7 @@ import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, 
 import Utility exposing (factorial, permutation, combination, starJes, median, starling)
 import Test exposing (fuzz)
 import Fuzz exposing (float)
+import Round exposing (roundNum)
 
 
 calcuTest : Test
@@ -65,6 +66,12 @@ calcuTest =
                             [ 4, 4, 5, 6, 6 ]
                     in
                     greaterThan 0.8 (standardDeviation dataX)
+            , test "標準化を試みる" <|
+                \_ ->
+                    let
+                        data = [50, 70]
+                    in
+                        equalLists [43, 57] <| List.map (\x -> round x) <| List.map (\x -> 10*x + 50) (Stat.standartdization data)
             , test "シャープレシオを求める" <|
                 \_ ->
                     let
@@ -300,5 +307,5 @@ probalityTest =
     describe "様々な確率の公式のテスト"
         [ test "スターリングの公式これは階乗を指数で近似する公式のことである。" <|
             \_ ->
-                3598695.61874 |> within (Expect.Absolute 0.001) ( starling 10 )
+                363.74 |> within (Expect.Absolute 0.001) ( roundNum 2 <| starling 100 )
         ]
