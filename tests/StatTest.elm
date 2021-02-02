@@ -3,11 +3,15 @@ module StatTest exposing (..)
 import Dict
 import Expect exposing (equal, equalDicts, equalLists, greaterThan, within)
 import List
-import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, factorial, permutation,combination, biDistributionProbability, biDistribution)
+import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, biDistributionProbability, biDistribution)
 
 import Test exposing (Test, describe, test, todo)
 import Stat exposing (coefficientOfVariation, standardNormalV)
-import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData )
+import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData, shapeRetioList )
+import Utility exposing (factorial, permutation, combination, starJes, median, starling)
+import Test exposing (fuzz)
+import Fuzz exposing (float)
+import Round exposing (roundNum)
 
 
 calcuTest : Test
@@ -62,6 +66,12 @@ calcuTest =
                             [ 4, 4, 5, 6, 6 ]
                     in
                     greaterThan 0.8 (standardDeviation dataX)
+            , test "標準化を試みる" <|
+                \_ ->
+                    let
+                        data = [50, 70]
+                    in
+                        equalLists [43, 57] <| List.map (\x -> round x) <| List.map (\x -> 10*x + 50) (Stat.standartdization data)
             , test "シャープレシオを求める" <|
                 \_ ->
                     let
@@ -75,6 +85,13 @@ calcuTest =
                             3.0
                     in
                     0.44 |> within (Expect.Absolute 0.01) (shapeRetio avarage kokusai sD)
+            , fuzz (Fuzz.list float) "平均値が０になり、S.D.が１になるリストを作る関数" <|
+                \listFloat ->
+                    listFloat
+                        |> shapeRetioList
+                        |> average
+                        |> Debug.log "output"
+                        |> within (Expect.Absolute 0.001) 0
             , test "不等式で正規分布を表示" <|
                 \_ ->
                     let
@@ -111,12 +128,6 @@ calcuTest =
             , test "カイ二乗分布で求めるパーセンテージ" <|
                 \_ ->
                     0.28 |> within (Expect.Absolute 0.01) (x2Distribution 3 6)
-
-            , todo "標本分散を求める。"
-
-            -- 一つの多次元リストからランダムにちゃんと値を取り出せるか
-            , todo "無作為抽出"
-
             , test "変動係数" <|
                 \_ ->
                     0.303 |> within (Expect.Absolute 0.001) (coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ])
@@ -211,15 +222,14 @@ hypothesisTest =
                     n = 100
                     aveRage = 198
                     -- TODO 有意水準の臨界値を求める関数を求める。
-                    cz = 1.645
                 in
                     Expect.true "従来より長くなった" (hypothesisForAlpha mu sigma n aveRage)
         , test "母標準偏差αがわからん場合の仮説検定(標本がすくない場合）" <|
             \_ ->
-                Expect.true "優位に長い" (hypothesisNotAlpha 180 20 198 15 0.05)
+                Expect.true "優位に長い" (hypothesisNotAlpha 180 20 198 15)
         , test "母標準偏差αがわからん場合の仮説検定(標本が多い場合）" <|
             \_ ->
-                Expect.true "優位に長い" (hypothesisNotAlpha 180 100 181 5 0.05)
+                Expect.true "優位に長い" (hypothesisNotAlpha 180 100 181 5)
         ]
 
 
@@ -270,4 +280,32 @@ correlationTest =
                 in
                     Dict.fromList [ ( "a", 7.5 ), ( "b", 0.69 ), ( "ta", 4.1992 ), ( "tb", 12.813), ( "r", 0.9910 )]
                         |> equalDicts ( regressionAnalysisRaw xi yi)
+        ]
+
+
+graphTest:Test
+graphTest =
+    describe "グラフを作成する時に出てくる数値はまともなものなのか" <|
+        [ test "スタージェスの公式のテスト" <|
+            \_ ->
+                let
+                    dataLength = List.range 0 64
+                    dataLengthFloated = List.map (\s -> toFloat s) dataLength
+                in
+                    equal 7 (starJes dataLengthFloated)
+        , test "メディアンを求める。(偶数編)" <|
+            \_ ->
+                2.5 |> within (Expect.Absolute 0.01) (median [1,1,1,1,2,3,4,5,16,20])
+        , test "メディアンを求める。(奇数編)" <|
+            \_ ->
+                equal 3 (median [1,2,3,4,5])
+        ]
+
+
+probalityTest:Test
+probalityTest =
+    describe "様々な確率の公式のテスト"
+        [ test "スターリングの公式これは階乗を指数で近似する公式のことである。" <|
+            \_ ->
+                363.74 |> within (Expect.Absolute 0.001) ( roundNum 2 <| starling 100 )
         ]

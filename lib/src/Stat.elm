@@ -17,6 +17,7 @@ import Dict exposing (Dict)
 import Html.Attributes exposing (list)
 import List exposing (length, map, sum)
 import Round exposing (roundNum)
+import Utility exposing (factorial, combination)
 
 
 {-| 算術平均、Float入Listを受け取ってFloatを返す
@@ -90,6 +91,15 @@ coefficientOfVariation sampleData =
     standardDeviation sampleData / average sampleData
 
 
+{-| standartdization
+標準化、これをもとに偏差値を求めることができる
+@example standartdization [50, 70]
+    OUT [43, 57] -- roundを事前に適用
+-}
+standartdization: List Float -> List Float
+standartdization list =
+    List.map (\l -> (l - (average list)) / (standardDeviation list)) list
+
 
 {- シャープレシオ
 
@@ -103,6 +113,20 @@ shapeRetio : Float -> Float -> Float -> Float
 shapeRetio averageProfitability contryYield sD =
     (averageProfitability - contryYield) / sD
 
+
+{- シャープレシオをリストで求めるようにしたら
+返されたリストで平均値を求めると０に、S.D.は１になる。
+-}
+shapeRetioList : List Float -> List Float
+shapeRetioList dataList =
+    let
+        result = List.map (\data -> shapeRetio data (average dataList) (standardDeviation dataList) ) dataList
+        a = average result
+    in
+      if isNaN a then
+          []
+      else
+          result
 
 
 {- 仮説検定の英訳、もっといい英訳があるかもしれない
@@ -264,28 +288,6 @@ chiSquare sample mu sigma =
     List.sum (List.map (\s -> (s - mu) ^ 2) sample) / (sigma ^ 2)
 
 
-
--- 標本分散 自由度を求める関数とそこからカイ二乗分布を割り出す関数を何かしら実装する必要がある。
-
-
-specimenDispersion : List Float -> Float -> Float
-specimenDispersion data mu =
-    Debug.todo "カイ二乗分布をうまく求める方法を理解する。"
-
-
-
--- RANDOM
-
-
-{-| 無作為抽出
--}
-randomSampling : List (List Float) -> Int -> List Float
-randomSampling multidimensionArray sampleNumber =
-    Debug.todo "どうやって多次元配列から抜き出せばよいだろうか"
-
-
-
----------------------------------------------- 後で分割するかもしれないが、まだまだファイルは小さいのでまとめて書く ----------------------------------------------
 -- 確率
 
 
@@ -487,55 +489,6 @@ popStandardD s n cc =
 
 
 --------分布のための関数ここまで、--------------------------
-----------色々やってくれる優しい関数
-
-
-{-| factorial
-階乗計算で再帰で実装する典型的な計算式です。
-
-    factorial 5
-
-    OUT 120
-
--}
-factorial : Int -> Int
-factorial n =
-    case n of
-        0 ->
-            1
-
-        _ ->
-            n * factorial (n - 1)
-
-
-{-| permutation
-順列
-
-    permutation 4 2
-
-    OUT 12
-
--}
-permutation : Int -> Int -> Int
-permutation n m =
-    factorial n // factorial (n - m)
-
-
-{-| combination
-組み合わせ
-
-    combination 10 3
-
-    OUT 120
-
--}
-combination : Int -> Int -> Int
-combination n m =
-    factorial n // (factorial (n - m) * factorial m)
-
-
-
-------色々やってくれる優しい関数ここまで
 
 
 -- 仮定と分析の関数
@@ -571,10 +524,11 @@ hypothesisForAlpha mu sigma n aveRage =
 
 {-| hypothesisNotAlpha
 母標準偏差αがわからん場合の仮説検定
-例題:標本が20で標本平均が
+例題:標本が20で標本平均が１９８時間の電池があった
+その標本標準偏差は15である。
 -}
-hypothesisNotAlpha : Float -> Int -> Float -> Float -> Float -> Bool
-hypothesisNotAlpha mu n xi s _ =
+hypothesisNotAlpha : Float -> Int -> Float -> Float -> Bool
+hypothesisNotAlpha mu n xi s =
     let
         ct =
             tDistIntentionalLevelFivePer (n - 1)
