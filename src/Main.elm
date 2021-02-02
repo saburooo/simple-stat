@@ -321,7 +321,7 @@ listFloatView model.string "何らかのメッセージ" average
 -}
 oneValueView: String -> String -> (List Float -> Float) -> Html Msg
 oneValueView listFloat strText funcL =
-    div [ class "" ] [  Html.td [ class "td" ] [ text <| strText ], Html.td [] [ text <| String.fromFloat <| roundNum 4 <| funcL <| stringToListFloat listFloat ] ]
+    div [ class "" ] [  Html.td [ ] [ text <| strText ], Html.td [] [ text <| String.fromFloat <| roundNum 4 <| funcL <| stringToListFloat listFloat ] ]
 
 
 {-| listView
