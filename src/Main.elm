@@ -240,6 +240,7 @@ topView model =
                                 , manyValueView model.listOne "入力された値の偏差は：" Stat.deviation
                                 , oneValueView model.listOne "入力された値の標準偏差は：" Stat.standardDeviation
                                 , oneValueView model.listOne "入力された値の変動係数は：" Stat.coefficientOfVariation
+                                , oneValueView model.listOne "入力された値の中央値は：" Utility.median
                                 , manyValueView model.listOne "入力された値を標準化すると：" Stat.standartdization
                                 , div [] [ text "標準化したリストをグラフで示すと"
                                         , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.standartdization)
