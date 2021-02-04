@@ -169,13 +169,12 @@ dictInFloatToString dictFS str =
   Maybe.withDefault 0 (Dict.get str dictFS)
 
 
-strToInt: String -> Int
-strToInt str =
+strToIntList: String -> List Int
+strToIntList str =
     let
         splited = String.split "," str
-        castedInt = List.map (\s -> Maybe.withDefault 0 (String.toInt s)) splited
     in
-        List.sum castedInt
+        List.map (\s -> Maybe.withDefault 0 (String.toInt s)) splited
     
 
 
@@ -226,8 +225,8 @@ topView model =
         one = stringToListFloat model.listOne
         two = stringToListFloat model.listTwo
         three = stringToListFloat model.listThree
-        oneInt = strToInt model.listOne
-        twoInt = strToInt model.listTwo
+        oneInt = strToIntList model.listOne
+        twoInt = strToIntList model.listTwo
     in
         case model.route of
             Top ->
@@ -275,15 +274,16 @@ topView model =
                 div [  ]
                 [ h1 [ class "title message-header" ] [text "二項分布・ポアソン分布" ]
                 , inputView "リストその１" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
+                , inputView "リストその２" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne TwoList
                 , div [] 
                     [ h2 [ class "subtitle" ] [ text "二項分布をしてみたら" ]
                     , p [] [ text "リストで表示すると以下のとおりになる" ]
-                    , p [] [ text ( Stat.biDistribution (List.sum one) (List.length one) |> listFloatToString ) ]
+                    , p [] [ text ( Stat.biDistribution (List.sum one) (List.sum twoInt) |> listFloatToString ) ]
                     ]
                 , div [] 
                     [ h2 [ class "subtitle" ] [text "ポアソン分布をしてみたら" ]
                     , p [] [ text "リストで表示すると以下のとおりになる" ]
-                    , p [] [ text ( Stat.poisson (List.sum one) (List.length one) |> listFloatToString ) ]
+                    , p [] [ text ( Stat.poisson (List.sum one) (List.length twoInt) |> listFloatToString ) ]
                     ]
                 ]
 
@@ -402,14 +402,18 @@ regressionView xi yi _ =
             ]
 
 
-parcentageView: Int -> Int -> Html Msg
+parcentageView: List Int -> List Int -> Html Msg
 parcentageView oneInt twoInt =
+    let
+        sumOne = List.sum oneInt
+        sumTwo = List.sum twoInt
+    in
     div []
     [ ul []
-        [ li [] [ text ("リストの合計" ++ String.fromInt oneInt) ]
-        , li [] [ text ("階乗計算じゃよ" ++ String.fromInt (Utility.factorial oneInt)) ]
-        , li [] [ text ("順列なのだよ" ++ String.fromInt (Utility.permutation oneInt twoInt)) ]
-        , li [] [ text ("組み合わせです" ++ String.fromInt (Utility.combination oneInt twoInt)) ]
+        [ li [] [ text ("リストの合計" ++ String.fromInt sumOne) ]
+        , li [] [ text ("階乗計算じゃよ" ++ String.fromInt (Utility.factorial sumOne )) ]
+        , li [] [ text ("順列なのだよ" ++ String.fromInt (Utility.permutation sumOne sumTwo )) ]
+        , li [] [ text ("組み合わせです" ++ String.fromInt (Utility.combination sumOne sumTwo )) ]
         ]
     ]
 
