@@ -82,6 +82,7 @@ type Msg
     | Distribution
     | Parcentage
     | Hypothesis
+    | ClickCalc
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -131,6 +132,9 @@ update msg model =
             ( { model | route = Hypo }
             , Cmd.none
             )
+
+        ClickCalc ->
+            Debug.todo "計算ボタンの実装"
 
 
 -- Utility
@@ -241,9 +245,6 @@ topView model =
                                 , oneValueView model.listOne "入力された値の変動係数は：" Stat.coefficientOfVariation
                                 , oneValueView model.listOne "入力された値の中央値は：" Utility.median
                                 , manyValueView model.listOne "入力された値を標準化すると：" Stat.standartdization
-                                , div [] [ text "標準化したリストをグラフで示すと"
-                                        , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.standartdization)
-                                        ]
                                 , manyValueView model.listOne "入力された値のシャープレシオを示した数値は：" Stat.shapeRetioList
                                 , fiducialView (Stat.fiducialInterval (toFloat (List.length (one) )) (Stat.standardDeviation (one)))
                                 ]
@@ -273,17 +274,21 @@ topView model =
             Dist ->
                 div [  ]
                 [ h1 [ class "title message-header" ] [text "二項分布・ポアソン分布" ]
-                , inputView "リストその１" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
-                , inputView "リストその２" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne TwoList
-                , div [] 
+                , inputView "リストその１ - 確率を入力してね" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
+                , inputView "リストその２ - 回数を入力してね" ", 間隔で数字を入力してね。全部合計されるよ" model.listTwo TwoList
+                , p [] [ text ("リストその1は" ++ String.fromFloat (List.sum one) ++ "リストその2は" ++ String.fromInt (List.sum twoInt) )]
+                , button [ onClick ClickCalc ] [ text "計算する" ]
+                , div [ class "content" ] 
                     [ h2 [ class "subtitle" ] [ text "二項分布をしてみたら" ]
                     , p [] [ text "リストで表示すると以下のとおりになる" ]
                     , p [] [ text ( Stat.biDistribution (List.sum one) (List.sum twoInt) |> listFloatToString ) ]
-                    ]
-                , div [] 
-                    [ h2 [ class "subtitle" ] [text "ポアソン分布をしてみたら" ]
+                    , h2 [ class "subtitle" ] [text "ポアソン分布をしてみたら" ]
                     , p [] [ text "リストで表示すると以下のとおりになる" ]
-                    , p [] [ text ( Stat.poisson (List.sum one) (List.length twoInt) |> listFloatToString ) ]
+                    , p [] [ text ( Stat.poisson (List.sum one) (List.sum twoInt) |> listFloatToString ) ]
+                    , h2 [ class "subtitle" ] [ text "二項分布をグラフっぽくすると" ]
+                    , Chart.listVisualizeArgOne ( Stat.biDistribution (List.sum one) (List.sum twoInt) ) 
+                    , h2 [ class "subtitle" ] [ text "ポアソン分布をグラフっぽくすると" ]
+                    , Chart.listVisualizeArgOne ( Stat.poisson (List.sum one) (List.sum twoInt) ) 
                     ]
                 ]
 

@@ -7,9 +7,7 @@ import Round
 
 -- TODO: NaNになってしまうのなんとかしたい。
 {-| hypergeometric -- 超幾何分布
-例題は本から取ったもので1000匹中200匹が尾ひれにマーカーがついている魚群が
-生息している
-@example hypergeometric 1000 200 5 1
+hypergeometric 1000 200 5 1
 OUT 0.41063
 -}
 hypergeometric:Int -> Int -> Int -> Int -> Float

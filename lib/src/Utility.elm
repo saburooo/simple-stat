@@ -50,7 +50,7 @@ combination n m =
 {-| starling
 ## スターリングの公式
 階乗計算を指数計算で近似する公式(よく似た数値を叩き出す。)
-@example starling 100
+starling 100
 OUT 363.74
 -}
 starling:Int -> Float
