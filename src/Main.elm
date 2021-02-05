@@ -51,6 +51,7 @@ type alias Model =
     , listTwo : String
     , listThree : String
     , route : Route
+    , calcurate : Bool
     }
 
 
@@ -66,7 +67,7 @@ type Route
 
 init : () -> ( Model, Cmd Msg)
 init _  =
-    (Model "" "" "" Top, Cmd.none)
+    (Model "" "" "" Top False, Cmd.none)
 
 
 -- UPDATE
@@ -134,7 +135,9 @@ update msg model =
             )
 
         ClickCalc ->
-            Debug.todo "計算ボタンの実装"
+            ( { model | calcurate = True }
+            , Cmd.none
+            )
 
 
 -- Utility
@@ -277,17 +280,17 @@ topView model =
                 , inputView "リストその１ - 確率を入力してね" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
                 , inputView "リストその２ - 回数を入力してね" ", 間隔で数字を入力してね。全部合計されるよ" model.listTwo TwoList
                 , p [] [ text ("リストその1は" ++ String.fromFloat (List.sum one) ++ "リストその2は" ++ String.fromInt (List.sum twoInt) )]
-                , button [ onClick ClickCalc ] [ text "計算する" ]
+                , button [ class "button is-large", onClick ClickCalc ] [ text "計算する" ]
                 , div [ class "content" ] 
-                    [ h2 [ class "subtitle" ] [ text "二項分布をしてみたら" ]
+                    [ h3 [ class "subtitle" ] [ text "二項分布をしてみたら" ]
                     , p [] [ text "リストで表示すると以下のとおりになる" ]
                     , p [] [ text ( Stat.biDistribution (List.sum one) (List.sum twoInt) |> listFloatToString ) ]
-                    , h2 [ class "subtitle" ] [text "ポアソン分布をしてみたら" ]
+                    , h3 [ class "subtitle" ] [text "ポアソン分布をしてみたら" ]
                     , p [] [ text "リストで表示すると以下のとおりになる" ]
                     , p [] [ text ( Stat.poisson (List.sum one) (List.sum twoInt) |> listFloatToString ) ]
-                    , h2 [ class "subtitle" ] [ text "二項分布をグラフっぽくすると" ]
+                    , h3 [ class "subtitle" ] [ text "二項分布をグラフっぽくすると" ]
                     , Chart.listVisualizeArgOne ( Stat.biDistribution (List.sum one) (List.sum twoInt) ) 
-                    , h2 [ class "subtitle" ] [ text "ポアソン分布をグラフっぽくすると" ]
+                    , h3 [ class "subtitle" ] [ text "ポアソン分布をグラフっぽくすると" ]
                     , Chart.listVisualizeArgOne ( Stat.poisson (List.sum one) (List.sum twoInt) ) 
                     ]
                 ]
