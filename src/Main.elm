@@ -287,8 +287,7 @@ topView model =
                 , calcButtonView
                 , if model.calcurate == True then
                     div [] 
-                        [ calcButtonView
-                        , regressionView one two three
+                        [ regressionView one two three
                         ]
                 else
                     p [] [ text "ボタンを押してね" ]
@@ -303,8 +302,7 @@ topView model =
                 , calcButtonView
                 , if model.calcurate == True then
                     div [] 
-                        [ calcButtonView
-                        , distriView model one twoInt
+                        [ distriView model one twoInt
                         ]
                 else
                     p [] [ text "ボタンを押してね" ]
@@ -318,8 +316,7 @@ topView model =
                 , calcButtonView
                 , if model.calcurate == True then
                     div [] 
-                        [ calcButtonView
-                        , parcentageView oneInt twoInt
+                        [ parcentageView oneInt twoInt
                         ] 
                 else
                     p [] [ text "ボタンを押してね" ]
