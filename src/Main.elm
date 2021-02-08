@@ -255,6 +255,8 @@ topView model =
                                     , oneValueView model.listOne "入力された値の変動係数は：" Stat.coefficientOfVariation
                                     , oneValueView model.listOne "入力された値の中央値は：" Utility.median
                                     , manyValueView model.listOne "入力された値を標準化すると：" Stat.standartdization
+                                    , p [] [ text "標準化した値をグラフにすると" ]
+                                    , Chart.listVisualizeArgOne ( Stat.standartdization <| stringToListFloat <| model.listOne)                                    
                                     , manyValueView model.listOne "入力された値のシャープレシオを示した数値は：" Stat.shapeRetioList
                                     , fiducialView (Stat.fiducialInterval (toFloat (List.length (one) )) (Stat.standardDeviation (one)))
                                     ]
