@@ -9,16 +9,20 @@ import TypedSvg.Types as Types
 
 import Color
 
+import Round exposing (roundNum)
+
 import Tuple
 import TypedSvg.Attributes exposing (stroke)
 import TypedSvg.Attributes exposing (strokeWidth)
 import TypedSvg.Attributes exposing (transform)
 
-import Utility
 import TypedSvg.Attributes.InEm exposing (x1, x2, y1, y2)
 import TypedSvg.Attributes.InEm as InEm
 import TypedSvg.Attributes.InEm exposing (fontSize)
 
+import Dict
+
+import Utility
 
 -- グラフを作成するためにタイプを生成
 type Graph
@@ -39,8 +43,6 @@ listVisualizeArgOne floatList =
     let
         floatListMap = ( List.map (\y -> y ^ 2 * 100) <| floatList )
         floatRange = List.map (\x -> toFloat x * 100) (List.range 1 ( (List.length floatListMap) + 1 ))
-        tupleFloatList = List.map2 Tuple.pair floatRange floatListMap
-        headd = Maybe.withDefault 1 ( List.head floatList )
     in
         Svg.svg [ viewBox 0 0 500 250 ]
             [ backColor Color.lightBlue
@@ -55,7 +57,7 @@ listVisualizeArgOne floatList =
                             , fill ( Types.PaintNone )
                             , stroke (Types.Paint Color.blue)
                             , TypedSvg.Attributes.style "transform: scale(1, -1)"
-                            , strokeWidth (Types.px 6) ] [] 
+                            , strokeWidth (Types.px 6) ] []
                 ]
             ]
 
@@ -63,14 +65,26 @@ listVisualizeArgOne floatList =
 -- TODO 上記のタイプを使ったグラフのView関数を制作する。
 
 
+histgramBar: Float -> Float -> Svg.Svg msg
+histgramBar x h =
+    Svg.rect [ InEm.width 2, InEm.x x, InEm.height h, fill (Types.Paint Color.blue) ] []
+
+
+appendClass: List Float -> Dict ( Tuple Float Float ) ( List Float ) 
+appendClass floatList =
+    let
+        bundary = ( Maybe.withDefault 0 ( List.maximum floatList ) - Maybe.withDefault 0 ( List.minimum floatList ) ) / toFloat (List.length floatList) |> roundNum 4
+        starJesRange = List.range 0 ( Utility.starJes floatList )
+    in
+        Debug.todo "〇〇以上XX未満のタプルと条件に一致するリストが入ったDictを作成する。"
+
+
 listHistgram:List Float -> Svg.Svg msg
 listHistgram floatList =
     let
-        bundary = ( Maybe.withDefault 0 ( List.maximum floatList ) - Maybe.withDefault 0 ( List.minimum floatList ) ) / toFloat (List.length floatList)
-        starJess = Utility.starJes floatList
+        indexed = List.indexedMap Tuple.pair floatList 
     in
-        Svg.svg [ viewBox 0 0 500 500 ] [
-            Svg.text_ [InEm.x 5.5, InEm.y 1.1, fontSize 0.8, fill (Types.Paint Color.darkBlue)] [
-                Svg.text ( (String.fromFloat bundary) ++ "と" ++ (String.fromInt starJess) )
-            ]
-        ]
+        Svg.svg [ viewBox 0 0 500 200 ]
+          [ backColor Color.lightBlue
+          , TypedSvg.g [ transform [ Types.Translate 0 200 ] ] (List.map (\a -> histgramBar ( toFloat ( Tuple.first a ) ) ( Tuple.second a )) floatList)
+          ]
