@@ -11,6 +11,8 @@ import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, 
 import Utility exposing (factorial, permutation, combination, combinationStarling, starJes, median, starling)
 import Distribution
 
+import Chart
+
 import Test exposing (Test, describe, test)
 import Test exposing (fuzz)
 import Fuzz exposing (float)
@@ -328,4 +330,16 @@ distributionTest =
         , test "超幾何分布のテスト(別パターン)" <|
             \_ ->
                 0.32686 |> within (Expect.Absolute 0.0001) (Distribution.hypergeometric 1000 200 5 0)
+        ]
+
+
+frequencyTest:Test
+frequencyTest =
+    describe "度数テスト"
+        [ test "度数に入れるかテスト" <|
+            \_ ->
+                equalLists ( List.singleton ( (0, 6), 5 ) ) ( Chart.frequency (0, 6) [1,2,3,4,5,6] ) 
+        , test "度数のリストはどうなってるか" <|
+            \_ ->
+                equalDicts (  Dict.singleton (0, 6) 4 ) ( Chart.appendClass [1,2,3,4,5])
         ]

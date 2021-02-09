@@ -11,7 +11,6 @@ import Color
 
 import Round exposing (roundNum)
 
-import Tuple
 import TypedSvg.Attributes exposing (stroke)
 import TypedSvg.Attributes exposing (strokeWidth)
 import TypedSvg.Attributes exposing (transform)
@@ -20,7 +19,9 @@ import TypedSvg.Attributes.InEm exposing (x1, x2, y1, y2)
 import TypedSvg.Attributes.InEm as InEm
 import TypedSvg.Attributes.InEm exposing (fontSize)
 
-import Dict
+import Tuple
+import Tuple as Tuple
+import Dict exposing (Dict)
 
 import Utility
 
@@ -43,6 +44,8 @@ listVisualizeArgOne floatList =
     let
         floatListMap = ( List.map (\y -> y ^ 2 * 100) <| floatList )
         floatRange = List.map (\x -> toFloat x * 100) (List.range 1 ( (List.length floatListMap) + 1 ))
+        tupleFloatList = List.map2 Tuple.pair floatRange floatListMap
+        headd = Maybe.withDefault 0 (List.head floatList)
     in
         Svg.svg [ viewBox 0 0 500 250 ]
             [ backColor Color.lightBlue
@@ -67,16 +70,34 @@ listVisualizeArgOne floatList =
 
 histgramBar: Float -> Float -> Svg.Svg msg
 histgramBar x h =
-    Svg.rect [ InEm.width 2, InEm.x x, InEm.height h, fill (Types.Paint Color.blue) ] []
+    Svg.rect [ InEm.width 1, height (Types.percent 100), InEm.x x, InEm.height h 
+        , TypedSvg.Attributes.style "transform: scale(1, -1)"
+        , fill (Types.Paint Color.blue)
+        , strokeWidth (Types.px 2)
+        , stroke ( Types.Paint Color.darkBlue )
+        ] []
 
 
-appendClass: List Float -> Dict ( Tuple Float Float ) ( List Float ) 
+appendClass: List Float -> Dict ( Float, Float ) Int
 appendClass floatList =
     let
-        bundary = ( Maybe.withDefault 0 ( List.maximum floatList ) - Maybe.withDefault 0 ( List.minimum floatList ) ) / toFloat (List.length floatList) |> roundNum 4
-        starJesRange = List.range 0 ( Utility.starJes floatList )
+        star = Utility.starJes floatList
+        bundary = ( Maybe.withDefault 0 ( List.maximum floatList ) - ( Maybe.withDefault 0 ( List.minimum floatList ) ) ) / toFloat star
+        classInterval = ( List.map2 (Tuple.pair) ( List.map (\s -> toFloat s * bundary) ( List.range 0 star ) ) ( List.map (\s -> toFloat s * bundary) ( List.range 1 ( star + 1 ) ) ) )
     in
-        Debug.todo "〇〇以上XX未満のタプルと条件に一致するリストが入ったDictを作成する。"
+        Dict.fromList ( List.map (\cls -> frequency cls floatList) classInterval )
+
+
+frequency: ( Float, Float ) -> List Float -> List ( ( Float, Float ), Int )
+frequency tupFloat comparisonList =
+    let
+        first = Tuple.first tupFloat
+        second = Tuple.second tupFloat
+    in
+        List.singleton ( tupFloat, ( List.filter (\c -> c >= first && c < second) comparisonList |> List.length ) )
+
+
+-- リストに入る条件にあった数値を入れる。
 
 
 listHistgram:List Float -> Svg.Svg msg
@@ -86,5 +107,5 @@ listHistgram floatList =
     in
         Svg.svg [ viewBox 0 0 500 200 ]
           [ backColor Color.lightBlue
-          , TypedSvg.g [ transform [ Types.Translate 0 200 ] ] (List.map (\a -> histgramBar ( toFloat ( Tuple.first a ) ) ( Tuple.second a )) floatList)
+          , TypedSvg.g [ transform [ Types.Translate 0 199 ] ] (List.map (\a -> histgramBar ( toFloat ( Tuple.first a ) ) ( sqrt ( Tuple.second a ^ 2 ) )) indexed)
           ]
