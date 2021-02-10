@@ -78,23 +78,30 @@ histgramBar x h =
         ] []
 
 
-appendClass: List Float -> Dict ( Float, Float ) Int
+type alias Class =
+       { classWidth : ( Float, Float)
+       , classCount : Float 
+       }
+
+
+appendClass: List Float -> Dict ( Float, Float ) Float 
 appendClass floatList =
     let
         star = Utility.starJes floatList
         bundary = ( Maybe.withDefault 0 ( List.maximum floatList ) - ( Maybe.withDefault 0 ( List.minimum floatList ) ) ) / toFloat star
         classInterval = ( List.map2 (Tuple.pair) ( List.map (\s -> toFloat s * bundary) ( List.range 0 star ) ) ( List.map (\s -> toFloat s * bundary) ( List.range 1 ( star + 1 ) ) ) )
+        frequencyList = ( List.map (\cls -> frequency cls floatList) classInterval )
     in
-        Dict.fromList ( List.map (\cls -> frequency cls floatList) classInterval )
+        Dict.fromList frequencyList
 
 
-frequency: ( Float, Float ) -> List Float -> List ( ( Float, Float ), Int )
+frequency: ( Float, Float ) -> List Float -> ( ( Float, Float ), Float )
 frequency tupFloat comparisonList =
     let
         first = Tuple.first tupFloat
         second = Tuple.second tupFloat
     in
-        List.singleton ( tupFloat, ( List.filter (\c -> c >= first && c < second) comparisonList |> List.length ) )
+        ( tupFloat, ( List.filter (\c -> c >= first && c < second) comparisonList |> List.length |> toFloat ) )
 
 
 -- リストに入る条件にあった数値を入れる。
