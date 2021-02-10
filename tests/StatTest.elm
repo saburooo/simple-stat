@@ -338,8 +338,8 @@ frequencyTest =
     describe "度数テスト"
         [ test "度数に入れるかテスト" <|
             \_ ->
-                equalLists ( List.singleton ( (0, 6), 5 ) ) ( Chart.frequency (0, 6) [1,2,3,4,5,6] ) 
+                equal ( ( (0, 6), 5 ) ) ( Chart.frequency (0, 6) [1,2,3,4,5,6] ) 
         , test "度数のリストはどうなってるか" <|
             \_ ->
-                equalDicts (  Dict.singleton (0, 6) 4 ) ( Chart.appendClass [1,2,3,4,5])
+                equalDicts (Dict.fromList [((0,1.3333333333333333),1),((1.3333333333333333,2.6666666666666665),1),((2.6666666666666665,4),1),((4,5.333333333333333),2)]) ( Chart.appendClass [1,2,3,4,5])
         ]

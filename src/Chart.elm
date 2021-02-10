@@ -24,11 +24,7 @@ import Tuple as Tuple
 import Dict exposing (Dict)
 
 import Utility
-
--- グラフを作成するためにタイプを生成
-type Graph
-        = Xscale
-        | Yscale
+import Svg exposing (text)
 
 
 -- SVG
@@ -68,6 +64,8 @@ listVisualizeArgOne floatList =
 -- TODO 上記のタイプを使ったグラフのView関数を制作する。
 
 
+{-| histgramBar is function to create a histogram
+-}
 histgramBar: Float -> Float -> Svg.Svg msg
 histgramBar x h =
     Svg.rect [ InEm.width 1, height (Types.percent 100), InEm.x x, InEm.height h 
@@ -77,19 +75,16 @@ histgramBar x h =
         , stroke ( Types.Paint Color.darkBlue )
         ] []
 
-
-type alias Class =
-       { classWidth : ( Float, Float)
-       , classCount : Float 
-       }
-
-
+{-| 
+## appendClass is a function that determines the class and the width of the class to produce a frequency.
+@example Chart.appendClass [1,2,3,4,5] == Dict.fromList [((0,1.3333333333333333),1),((1.3333333333333333,2.6666666666666665),1),((2.6666666666666665,4),1),((4,5.333333333333333),2)]
+-}
 appendClass: List Float -> Dict ( Float, Float ) Float 
 appendClass floatList =
     let
         star = Utility.starJes floatList
         bundary = ( Maybe.withDefault 0 ( List.maximum floatList ) - ( Maybe.withDefault 0 ( List.minimum floatList ) ) ) / toFloat star
-        classInterval = ( List.map2 (Tuple.pair) ( List.map (\s -> toFloat s * bundary) ( List.range 0 star ) ) ( List.map (\s -> toFloat s * bundary) ( List.range 1 ( star + 1 ) ) ) )
+        classInterval = ( List.map2 (Tuple.pair) ( List.map (\s -> toFloat s * bundary |> roundNum 2) ( List.range 0 star ) ) ( List.map (\s -> toFloat s * bundary |> roundNum 2) ( List.range 1 ( star + 1 ) ) ) )
         frequencyList = ( List.map (\cls -> frequency cls floatList) classInterval )
     in
         Dict.fromList frequencyList
@@ -107,12 +102,32 @@ frequency tupFloat comparisonList =
 -- リストに入る条件にあった数値を入れる。
 
 
+{-| Function that takes a list and returns a histogram
+listHistgram [ 1, 2, 3, 4, 5 ]
+-}
 listHistgram:List Float -> Svg.Svg msg
 listHistgram floatList =
     let
-        indexed = List.indexedMap Tuple.pair floatList 
+        indexed = appendClass floatList
+        dictRange = Dict.size indexed |> List.range 0 |> List.map (\x -> toFloat x) 
+        inserted = List.map2 (Tuple.pair) dictRange (Dict.values indexed )
     in
-        Svg.svg [ viewBox 0 0 500 200 ]
+        Svg.svg [ viewBox 0 0 800 250 ]
           [ backColor Color.lightBlue
-          , TypedSvg.g [ transform [ Types.Translate 0 199 ] ] (List.map (\a -> histgramBar ( toFloat ( Tuple.first a ) ) ( sqrt ( Tuple.second a ^ 2 ) )) indexed)
+          , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] (List.map (\h -> histgramBar ( Tuple.first h ) ( Tuple.second h ^ 2 )) inserted)
+          , TypedSvg.text_ [ transform [ Types.Translate 0 230 ], fontSize 0.7, fill (Types.Paint Color.white) ] [ text ( listTupleStr (Dict.keys indexed) ) ]
           ]
+
+
+{-| listTupleStr List (Float, Float) -> String 
+listTupleStr [(0.5, 1.0)] == "0.5から1.0まで, "
+-}
+listTupleStr: List (Float, Float) -> String
+listTupleStr listTuple =
+    let
+        first = List.unzip listTuple |> Tuple.first |> List.map (\f -> String.fromFloat f ++ "から")
+        second = List.unzip listTuple |> Tuple.second |> List.map (\f -> String.fromFloat f ++ "まで, ")
+    in
+        List.map2 (++) first second |> String.concat
+
+    
