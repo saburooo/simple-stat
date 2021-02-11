@@ -83,8 +83,8 @@ appendClass: List Float -> Dict ( Float, Float ) Float
 appendClass floatList =
     let
         star = Utility.starJes floatList
-        bundary = ( Maybe.withDefault 0 ( List.maximum floatList ) - ( Maybe.withDefault 0 ( List.minimum floatList ) ) ) / toFloat star
-        classInterval = ( List.map2 (Tuple.pair) ( List.map (\s -> toFloat s * bundary |> roundNum 2) ( List.range 0 star ) ) ( List.map (\s -> toFloat s * bundary |> roundNum 2) ( List.range 1 ( star + 1 ) ) ) )
+        bundary = ( Maybe.withDefault 0 ( Maybe.map2 (-) ( List.maximum floatList ) ( List.minimum floatList ) ) ) / toFloat star
+        classInterval = ( List.map2 (Tuple.pair) ( List.map (\s -> toFloat s * bundary |> roundNum 2) ( List.range 0 ( star + 1 ) ) ) ( List.map (\s -> toFloat s * bundary |> roundNum 2) ( List.range 1 ( star + 2 ) ) ) )
         frequencyList = ( List.map (\cls -> frequency cls floatList) classInterval )
     in
         Dict.fromList frequencyList
@@ -114,7 +114,7 @@ listHistgram floatList =
     in
         Svg.svg [ viewBox 0 0 800 250 ]
           [ backColor Color.lightBlue
-          , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] (List.map (\h -> histgramBar ( Tuple.first h ) ( Tuple.second h ^ 2 )) inserted)
+          , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] (List.map (\h -> histgramBar ( ( Tuple.first h ) + 1 ) ( Tuple.second h )) inserted)
           , TypedSvg.text_ [ transform [ Types.Translate 0 230 ], fontSize 0.7, fill (Types.Paint Color.white) ] [ text ( listTupleStr (Dict.keys indexed) ) ]
           ]
 

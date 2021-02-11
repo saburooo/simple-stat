@@ -413,6 +413,7 @@ olsClassifiedDataView xi yi f =
                 ]
             ]
 
+
 regressionView: List Float ->  List Float ->  List Float -> Html Msg
 regressionView xi yi _ =
   let
@@ -445,7 +446,7 @@ parcentageView oneInt twoInt =
     [ ul []
         [ li [] [ text ("リストの合計" ++ String.fromInt sumOne) ]
         , li [] [ text ("階乗計算じゃよ" ++ String.fromInt (Utility.factorial sumOne )) ]
-        , li [] [ text ("順列なのだよ" ++ String.fromInt (Utility.permutation sumOne sumTwo )) ]
+        , li [] [ text ("順列だよ" ++ String.fromInt (Utility.permutation sumOne sumTwo )) ]
         , li [] [ text ("組み合わせです" ++ String.fromInt (Utility.combination sumOne sumTwo )) ]
         ]
     ]
