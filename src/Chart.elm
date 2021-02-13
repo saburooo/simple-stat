@@ -6,6 +6,7 @@ import TypedSvg.Attributes exposing (viewBox, width, height)
 import TypedSvg.Attributes exposing (points)
 import TypedSvg.Attributes exposing (fill)
 import TypedSvg.Types as Types
+import TypedSvg.Attributes as Attribute
 
 import Color
 
@@ -35,11 +36,11 @@ backColor color =
     Svg.rect [ width (Types.percent 100), height (Types.percent 100), fill (Types.Paint color) ] []
 
 
-lineGrid: Int -> Svg.Svg msg
+lineGrid: Float -> Svg.Svg msg
 lineGrid f = 
     TypedSvg.g []
     [ Svg.line [ InEm.x1 0, InEm.y1 -f, InEm.x2 100, InEm.y2 -f, strokeWidth (Types.px 1), stroke (Types.Paint Color.white) ] []
-    , Svg.text_ [ InEm.height f ] [ Svg.text <| String.fromInt <| round <| f ]
+    , Svg.text_ [ InEm.x 0, InEm.y -f ] [ Svg.text <| String.fromInt <| round <| f ]
     ]
 
 
@@ -119,7 +120,7 @@ listHistgram floatList =
         indexed = appendClass floatList
         dictRange = Dict.size indexed |> List.range 0 |> List.map (\x -> toFloat x) 
         inserted = List.map2 (Tuple.pair) dictRange (Dict.values indexed )
-        graphRange = List.range 0 10
+        graphRange = List.range 0 10 |> List.map (\x -> toFloat x)
     in
         Svg.svg [ viewBox 0 0 800 250 ]
           [ backColor Color.lightBlue
@@ -141,3 +142,25 @@ listTupleStr listTuple =
         List.map2 (++) first second |> String.concat
 
     
+-- TODO 円グラフの作成
+listCircle: List Float -> Svg.Svg msg
+listCircle floatList =
+    let
+        indexed = appendClass floatList
+        dictRange = Dict.size indexed |> List.range 0 |> List.map (\x -> toFloat x) 
+        inserted = List.map2 (Tuple.pair) dictRange (Dict.values indexed )
+        graphRange = List.range 0 10 |> List.map (\x -> toFloat x)
+    in
+        Svg.svg [ viewBox 0 0 800 250 ]
+        [ backColor Color.lightBlue
+        , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] 
+        [ TypedSvg.circle [ InEm.cx 1, InEm.cy 1, Attribute.r ( Types.px 1 ) ] []
+        ]
+        ]
+
+graphView: List Float -> Svg.Svg msg
+graphView floatList =
+    Svg.svg [ viewBox 0 0 800 250 ]
+        [
+        ]
+

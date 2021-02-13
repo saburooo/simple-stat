@@ -252,6 +252,7 @@ topView model =
                                     [ oneValueView model.listOne "入力された値の平均値は：" Stat.average
                                     , manyValueView model.listOne "入力された値の偏差は右の値、グラフにすると以下" Stat.deviation
                                     , Chart.listHistgram ( List.map (\o -> abs o ) ( Stat.deviation one ) )
+                                    , Chart.listCircle ( List.map (\o -> abs o ) ( Stat.deviation one ) )
                                     , oneValueView model.listOne "入力された値の標準偏差は：" Stat.standardDeviation
                                     , oneValueView model.listOne "入力された値の変動係数は：" Stat.coefficientOfVariation
                                     , oneValueView model.listOne "入力された値の中央値は：" Utility.median
