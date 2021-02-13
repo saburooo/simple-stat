@@ -35,6 +35,14 @@ backColor color =
     Svg.rect [ width (Types.percent 100), height (Types.percent 100), fill (Types.Paint color) ] []
 
 
+lineGrid: Int -> Svg.Svg msg
+lineGrid f = 
+    TypedSvg.g []
+    [ Svg.line [ InEm.x1 0, InEm.y1 -f, InEm.x2 100, InEm.y2 -f, strokeWidth (Types.px 1), stroke (Types.Paint Color.white) ] []
+    , Svg.text_ [ InEm.height f ] [ Svg.text <| String.fromInt <| round <| f ]
+    ]
+
+
 listVisualizeArgOne: List Float -> Svg.Svg msg
 listVisualizeArgOne floatList =
     let
@@ -111,9 +119,11 @@ listHistgram floatList =
         indexed = appendClass floatList
         dictRange = Dict.size indexed |> List.range 0 |> List.map (\x -> toFloat x) 
         inserted = List.map2 (Tuple.pair) dictRange (Dict.values indexed )
+        graphRange = List.range 0 10
     in
         Svg.svg [ viewBox 0 0 800 250 ]
           [ backColor Color.lightBlue
+          , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] ( List.map (\l -> lineGrid l) graphRange )
           , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] (List.map (\h -> histgramBar ( ( Tuple.first h ) + 1 ) ( Tuple.second h )) inserted)
           , TypedSvg.text_ [ transform [ Types.Translate 0 230 ], fontSize 0.7, fill (Types.Paint Color.white) ] [ text ( listTupleStr (Dict.keys indexed) ) ]
           ]

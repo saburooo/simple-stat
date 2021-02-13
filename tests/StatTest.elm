@@ -8,7 +8,7 @@ import Round exposing (roundNum)
 import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, biDistributionProbability, biDistribution)
 import Stat exposing (coefficientOfVariation, standardNormalV)
 import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData, shapeRetioList )
-import Utility exposing (factorial, permutation, combination, combinationStarling, starJes, median, starling)
+import Utility exposing (factorial, permutation, combination, starJes, median, starling)
 import Distribution
 
 import Chart
@@ -326,10 +326,10 @@ distributionTest =
     describe "分布専用テスト"
         [ test "超幾何分布のテスト" <|
             \_ ->
-                0.41063 |> within (Expect.Absolute 0.0001) (Distribution.hypergeometric 1000 200 5 1)
+                0.41063 |> within (Expect.Absolute 0.0001) ( (Distribution.hypergeometric 1000 200 5 1) |> sqrt )
         , test "超幾何分布のテスト(別パターン)" <|
             \_ ->
-                0.32686 |> within (Expect.Absolute 0.0001) (Distribution.hypergeometric 1000 200 5 0)
+                0.32686 |> within (Expect.Absolute 0.0001) ( (Distribution.hypergeometric 1000 200 5 0) |> sqrt )
         ]
 
 
@@ -341,5 +341,5 @@ frequencyTest =
                 equal ( ( (0, 6), 5 ) ) ( Chart.frequency (0, 6) [1,2,3,4,5,6] ) 
         , test "度数のリストはどうなってるか" <|
             \_ ->
-                equalDicts (Dict.fromList [((0,1.3333333333333333),1),((1.3333333333333333,2.6666666666666665),1),((2.6666666666666665,4),1),((4,5.333333333333333),2)]) ( Chart.appendClass [1,2,3,4,5])
+                equalDicts (Dict.fromList [((0,1.33),1),((1.33,2.67),1),((2.67,4),1),((4,5.33),2),((5.33,6.67),0)]) ( Chart.appendClass [1,2,3,4,5])
         ]

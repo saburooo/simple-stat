@@ -272,7 +272,7 @@ topView model =
                 , inputView "リストその３" ", 間隔で数字を入力してね。" model.listThree ThreeList
                 , calcButtonView
                 , if model.calcurate == True then
-                    div [] 
+                    div []
                         [ olsRawDataView one two
                         , olsClassifiedDataView one two three
                         ]
