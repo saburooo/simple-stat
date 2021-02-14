@@ -116,8 +116,8 @@ frequency tupFloat comparisonList =
 {-| Function that takes a list and returns a histogram
 listHistgram [ 1, 2, 3, 4, 5 ]
 -}
-listHistgram: List Float -> Svg.Svg msg
-listHistgram floatList =
+listGraph: List Float -> Svg.Svg msg
+listGraph floatList =
     let
         indexed = appendClass floatList
         dictRange = Dict.size indexed |> List.range 0 |> List.map (\x -> toFloat x) 
@@ -125,11 +125,12 @@ listHistgram floatList =
         graphRange = List.range 0 10 |> List.map (\x -> toFloat x)
     in
         Svg.svg [ viewBox 0 0 800 250 ]
-          [ backColor Color.lightBlue
-          , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] ( List.map (\l -> lineGrid l) graphRange )
-          , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] (List.map (\h -> histgramBar ( ( Tuple.first h ) + 1 ) ( Tuple.second h )) inserted)
-          , TypedSvg.text_ [ transform [ Types.Translate 0 230 ], fontSize 0.7, fill (Types.Paint Color.white) ] [ text ( listTupleStr (Dict.keys indexed) ) ]
-          ]
+            [ backColor Color.lightBlue
+            , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] ( List.map (\l -> lineGrid l) graphRange )
+            , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] (List.map (\h -> histgramBar ( ( Tuple.first h ) + 1 ) ( Tuple.second h )) inserted)
+            , TypedSvg.text_ [ transform [ Types.Translate 0 230 ], fontSize 0.7, fill (Types.Paint Color.white) ] [ text ( listTupleStr (Dict.keys indexed) ) ]
+            , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] ( List.map (\c -> circleMap c) inserted )
+            ]
 
 
 {-| listTupleStr List (Float, Float) -> String 
@@ -166,12 +167,12 @@ circleMap tuple =
         second = Tuple.second tuple
     in
         TypedSvg.circle
-            [ InEm.cx 15.18309886184
-            , InEm.cy -3.18309886184
-            , InEm.r 1.59154943092
+            [ InEm.cx 30
+            , InEm.cy -5
+            , InEm.r 2
             , fill Types.PaintNone
-            , stroke ( Types.Paint ( Color.rgb first first second ) ) 
-            , InEm.strokeWidth 3.18309886184
-            , strokeDashoffset "25"
-            , strokeDasharray (( second |> String.fromFloat ) ++ "," ++ ( 10 - second |> String.fromFloat ))
+            , stroke ( Types.Paint ( Color.rgb ( first / 10 ) ( first / 10 ) ( first / 10 + 50 ) ) ) 
+            , InEm.strokeWidth 4
+            , strokeDashoffset (25 |> String.fromFloat)
+            , strokeDasharray (( second * 10 |> String.fromFloat ) ++ "," ++ ( 100 - second * 10 |> String.fromFloat ))
             ] []
