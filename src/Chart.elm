@@ -154,7 +154,7 @@ listCircle floatList =
     in
         Svg.svg [ viewBox 0 0 800 250 ]
         [ backColor Color.lightBlue
-            , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] 
+        , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] 
             ( List.map (\c -> circleMap c) inserted )
         ]
 
@@ -162,16 +162,16 @@ listCircle floatList =
 circleMap: (Float, Float) -> Svg.Svg msg
 circleMap tuple =
     let
-        first = Tuple.first tuple |> String.fromFloat
-        angle = Tuple.second tuple |> String.fromFloat 
+        first = Tuple.first tuple
+        second = Tuple.second tuple
     in
         TypedSvg.circle
-            [ InEm.cx 20
-            , InEm.cy -4
-            , InEm.r 2
+            [ InEm.cx 15.18309886184
+            , InEm.cy -3.18309886184
+            , InEm.r 1.59154943092
             , fill Types.PaintNone
-            , stroke ( Types.Paint Color.darkBlue ) 
-            , InEm.strokeWidth 4
+            , stroke ( Types.Paint ( Color.rgb first first second ) ) 
+            , InEm.strokeWidth 3.18309886184
             , strokeDashoffset "25"
-            , strokeDasharray (first ++ "," ++ angle)
+            , strokeDasharray (( second |> String.fromFloat ) ++ "," ++ ( 10 - second |> String.fromFloat ))
             ] []
