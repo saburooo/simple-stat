@@ -5,8 +5,8 @@ import Svg as Svg
 import TypedSvg.Attributes exposing (viewBox, width, height)
 import TypedSvg.Attributes exposing (points)
 import TypedSvg.Attributes exposing (fill)
+import TypedSvg.Attributes as Attributes
 import TypedSvg.Types as Types
-import TypedSvg.Attributes as Attribute
 
 import Color
 
@@ -26,6 +26,8 @@ import Dict exposing (Dict)
 
 import Utility
 import Svg exposing (text)
+import TypedSvg.Attributes exposing (strokeDashoffset)
+import TypedSvg.Attributes exposing (strokeDasharray)
 
 
 -- SVG
@@ -114,7 +116,7 @@ frequency tupFloat comparisonList =
 {-| Function that takes a list and returns a histogram
 listHistgram [ 1, 2, 3, 4, 5 ]
 -}
-listHistgram:List Float -> Svg.Svg msg
+listHistgram: List Float -> Svg.Svg msg
 listHistgram floatList =
     let
         indexed = appendClass floatList
@@ -149,18 +151,27 @@ listCircle floatList =
         indexed = appendClass floatList
         dictRange = Dict.size indexed |> List.range 0 |> List.map (\x -> toFloat x) 
         inserted = List.map2 (Tuple.pair) dictRange (Dict.values indexed )
-        graphRange = List.range 0 10 |> List.map (\x -> toFloat x)
     in
         Svg.svg [ viewBox 0 0 800 250 ]
         [ backColor Color.lightBlue
-        , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] 
-        [ TypedSvg.circle [ InEm.cx 1, InEm.cy 1, Attribute.r ( Types.px 1 ) ] []
-        ]
-        ]
-
-graphView: List Float -> Svg.Svg msg
-graphView floatList =
-    Svg.svg [ viewBox 0 0 800 250 ]
-        [
+            , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] 
+            ( List.map (\c -> circleMap c) inserted )
         ]
 
+
+circleMap: (Float, Float) -> Svg.Svg msg
+circleMap tuple =
+    let
+        first = Tuple.first tuple |> String.fromFloat
+        angle = Tuple.second tuple |> String.fromFloat 
+    in
+        TypedSvg.circle
+            [ InEm.cx 20
+            , InEm.cy -4
+            , InEm.r 2
+            , fill Types.PaintNone
+            , stroke ( Types.Paint Color.darkBlue ) 
+            , InEm.strokeWidth 4
+            , strokeDashoffset "25"
+            , strokeDasharray (first ++ "," ++ angle)
+            ] []
