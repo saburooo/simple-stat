@@ -51,6 +51,7 @@ type alias Model =
     , listTwo : String
     , listThree : String
     , route : Route
+    , calcurate : Bool
     }
 
 
@@ -66,7 +67,7 @@ type Route
 
 init : () -> ( Model, Cmd Msg)
 init _  =
-    (Model "" "" "" Top, Cmd.none)
+    (Model "" "" "" Top False, Cmd.none)
 
 
 -- UPDATE
@@ -82,6 +83,7 @@ type Msg
     | Distribution
     | Parcentage
     | Hypothesis
+    | ClickCalc
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -132,6 +134,16 @@ update msg model =
             , Cmd.none
             )
 
+        ClickCalc ->
+            if model.calcurate == True then
+                ( { model | calcurate = False }
+                , Cmd.none
+                )
+            else
+                ( { model | calcurate = True }
+                , Cmd.none
+                )
+
 
 -- Utility
 
@@ -169,13 +181,12 @@ dictInFloatToString dictFS str =
   Maybe.withDefault 0 (Dict.get str dictFS)
 
 
-strToInt: String -> Int
-strToInt str =
+strToIntList: String -> List Int
+strToIntList str =
     let
         splited = String.split "," str
-        castedInt = List.map (\s -> Maybe.withDefault 0 (String.toInt s)) splited
     in
-        List.sum castedInt
+        List.map (\s -> Maybe.withDefault 0 (String.toInt s)) splited
     
 
 
@@ -226,28 +237,30 @@ topView model =
         one = stringToListFloat model.listOne
         two = stringToListFloat model.listTwo
         three = stringToListFloat model.listThree
-        oneInt = strToInt model.listOne
-        twoInt = strToInt model.listTwo
+        oneInt = strToIntList model.listOne
+        twoInt = strToIntList model.listTwo
     in
         case model.route of
             Top ->
                 div [  ]
                     [ h1 [ class "title message-header" ] [ text "平均値、変動係数、標準偏差、偏差" ]
                         , inputView "下の入力欄に数字を入れてね" ", 間隔で数字を入力してね。" model.listOne OneList
-                        , Html.table [ class "table is-bordered" ] 
-                            [ Html.tr [] 
-                                [ oneValueView model.listOne "入力された値の平均値は：" Stat.average
-                                , manyValueView model.listOne "入力された値の偏差は：" Stat.deviation
-                                , oneValueView model.listOne "入力された値の標準偏差は：" Stat.standardDeviation
-                                , oneValueView model.listOne "入力された値の変動係数は：" Stat.coefficientOfVariation
-                                , manyValueView model.listOne "入力された値を標準化すると：" Stat.standartdization
-                                , div [] [ text "標準化したリストをグラフで示すと"
-                                        , Chart.listVisualizeArgOne (model.listOne |> stringToListFloat |> Stat.standartdization)
-                                        ]
-                                , manyValueView model.listOne "入力された値のシャープレシオを示した数値は：" Stat.shapeRetioList
-                                , fiducialView (Stat.fiducialInterval (toFloat (List.length (one) )) (Stat.standardDeviation (one)))
+                        , calcButtonView
+                        , if model.calcurate == True then
+                            Html.table [ class "table is-bordered" ] 
+                                [ Html.tr [] 
+                                    [ oneValueView model.listOne "入力された値の平均値は：" Stat.average
+                                    , manyValueView model.listOne "入力された値の偏差は右の値、グラフにすると以下" Stat.deviation
+                                    , Chart.listGraph ( List.map (\o -> abs o ) ( Stat.deviation one ) )
+                                    , oneValueView model.listOne "入力された値の標準偏差は：" Stat.standardDeviation
+                                    , oneValueView model.listOne "入力された値の変動係数は：" Stat.coefficientOfVariation
+                                    , oneValueView model.listOne "入力された値の中央値は：" Utility.median
+                                    , manyValueView model.listOne "入力された値を標準化すると：" Stat.standartdization
+                                    , fiducialView (Stat.fiducialInterval (toFloat (List.length (one) )) (Stat.standardDeviation (one)))
+                                    ]
                                 ]
-                            ]
+                        else
+                            p [] [ text "計算する待ちです。" ]
                     ]
 
             Ols ->
@@ -256,10 +269,14 @@ topView model =
                 , inputView "リストその１" ", 間隔で数字を入力してね。" model.listOne OneList
                 , inputView "リストその２" ", 間隔で数字を入力してね。" model.listTwo TwoList
                 , inputView "リストその３" ", 間隔で数字を入力してね。" model.listThree ThreeList
-                , br [][]
-                , olsRawDataView one two
-                , br [][]
-                , olsClassifiedDataView one two three
+                , calcButtonView
+                , if model.calcurate == True then
+                    div []
+                        [ olsRawDataView one two
+                        , olsClassifiedDataView one two three
+                        ]
+                else
+                    p [] [ text "ボタンを押してね" ]
                 ]
 
             Regres ->
@@ -267,23 +284,28 @@ topView model =
                 [ h1 [ class "title message-header" ] [ text "回帰分析" ]
                 , inputView "リストその１" ", 間隔で数字を入力してね。" model.listOne OneList
                 , inputView "リストその２" ", 間隔で数字を入力してね。" model.listTwo TwoList
-                , regressionView one two three
+                , calcButtonView
+                , if model.calcurate == True then
+                    div [] 
+                        [ regressionView one two three
+                        ]
+                else
+                    p [] [ text "ボタンを押してね" ]
                 ]
 
             Dist ->
                 div [  ]
                 [ h1 [ class "title message-header" ] [text "二項分布・ポアソン分布" ]
-                , inputView "リストその１" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
-                , div [] 
-                    [ h2 [ class "subtitle" ] [ text "二項分布をしてみたら" ]
-                    , p [] [ text "リストで表示すると以下のとおりになる" ]
-                    , p [] [ text ( Stat.biDistribution (List.sum one) (List.length one) |> listFloatToString ) ]
-                    ]
-                , div [] 
-                    [ h2 [ class "subtitle" ] [text "ポアソン分布をしてみたら" ]
-                    , p [] [ text "リストで表示すると以下のとおりになる" ]
-                    , p [] [ text ( Stat.poisson (List.sum one) (List.length one) |> listFloatToString ) ]
-                    ]
+                , inputView "リストその１ - 確率を入力してね" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
+                , inputView "リストその２ - 回数を入力してね" ", 間隔で数字を入力してね。全部合計されるよ" model.listTwo TwoList
+                , p [] [ text ("リストその1は" ++ String.fromFloat (List.sum one) ++ "リストその2は" ++ String.fromInt (List.sum twoInt) )]
+                , calcButtonView
+                , if model.calcurate == True then
+                    div [] 
+                        [ distriView model one twoInt
+                        ]
+                else
+                    p [] [ text "ボタンを押してね" ]
                 ]
 
             Parcen ->
@@ -291,7 +313,13 @@ topView model =
                 [ h1 [ class "title message-header" ] [text "確率計算" ]
                 , inputView "どれくらいものがあるのか" ", 間隔で数字を入力してね。全部合計されるよ" model.listOne OneList
                 , inputView "その中からいくつ持ってくのか" ", 間隔で数字を入力してね。上の数からどれくらい持っていく？" model.listTwo TwoList
-                , parcentageView oneInt twoInt
+                , calcButtonView
+                , if model.calcurate == True then
+                    div [] 
+                        [ parcentageView oneInt twoInt
+                        ] 
+                else
+                    p [] [ text "ボタンを押してね" ]
                 ]
 
             Hypo ->
@@ -299,7 +327,12 @@ topView model =
                 [ h1 [ class "title message-header" ] [text "仮説検定" ]
                 , inputView "仮説検定するサンプルを入力してください" "これをもとに仮説検定していきます" model.listOne OneList
                 , inputView "仮説検定する値を入力してください" "入力した値とサンプルを比較して正しいかどうか調べます。" model.listTwo TwoList
-                , hypoView one (List.sum two)
+                , calcButtonView
+                , if model.calcurate == True then
+                    div [] 
+                    [ hypoView one (List.sum two) ]
+                else
+                    p [] [ text "ボタンを押してね" ]
                 ]
 
 
@@ -379,6 +412,7 @@ olsClassifiedDataView xi yi f =
                 ]
             ]
 
+
 regressionView: List Float ->  List Float ->  List Float -> Html Msg
 regressionView xi yi _ =
   let
@@ -401,14 +435,18 @@ regressionView xi yi _ =
             ]
 
 
-parcentageView: Int -> Int -> Html Msg
+parcentageView: List Int -> List Int -> Html Msg
 parcentageView oneInt twoInt =
+    let
+        sumOne = List.sum oneInt
+        sumTwo = List.sum twoInt
+    in
     div []
     [ ul []
-        [ li [] [ text ("リストの合計" ++ String.fromInt oneInt) ]
-        , li [] [ text ("階乗計算じゃよ" ++ String.fromInt (Utility.factorial oneInt)) ]
-        , li [] [ text ("順列なのだよ" ++ String.fromInt (Utility.permutation oneInt twoInt)) ]
-        , li [] [ text ("組み合わせです" ++ String.fromInt (Utility.combination oneInt twoInt)) ]
+        [ li [] [ text ("リストの合計" ++ String.fromInt sumOne) ]
+        , li [] [ text ("階乗計算じゃよ" ++ String.fromInt (Utility.factorial sumOne )) ]
+        , li [] [ text ("順列だよ" ++ String.fromInt (Utility.permutation sumOne sumTwo )) ]
+        , li [] [ text ("組み合わせです" ++ String.fromInt (Utility.combination sumOne sumTwo )) ]
         ]
     ]
 
@@ -441,3 +479,27 @@ hypoView listFloat sample =
             , p [] [ text "採択できない。"]
             ]
         ]
+
+distriView: Model -> List Float -> List Int -> Html Msg
+distriView b one twoInt =
+    if b.calcurate == True then
+        div [ class "content" ] 
+            [ h3 [ class "subtitle" ] [ text "二項分布をしてみたら" ]
+            , p [] [ text "リストで表示すると以下のとおりになる" ]
+            , p [] [ text ( Stat.biDistribution (List.sum one) (List.sum twoInt) |> listFloatToString ) ]
+            , h3 [ class "subtitle" ] [text "ポアソン分布をしてみたら" ]
+            , p [] [ text "リストで表示すると以下のとおりになる" ]
+            , p [] [ text ( Stat.poisson (List.sum one) (List.sum twoInt) |> listFloatToString ) ]
+            , h3 [ class "subtitle" ] [ text "二項分布をグラフっぽくすると" ]
+            , Chart.listVisualizeArgOne ( Stat.biDistribution (List.sum one) (List.sum twoInt) ) 
+            , h3 [ class "subtitle" ] [ text "ポアソン分布をグラフっぽくすると" ]
+            , Chart.listVisualizeArgOne ( Stat.poisson (List.sum one) (List.sum twoInt) ) 
+            ]
+    else
+        div [] [ text "クリックすると計算されるよ。" ]
+
+
+calcButtonView : Html Msg
+calcButtonView =
+    div [ class "level-right" ] 
+        [ button [ class "button is-large is-info", onClick ClickCalc ] [ text "計算する" ] ]

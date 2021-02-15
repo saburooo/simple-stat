@@ -1,4 +1,4 @@
-module Utility exposing (factorial, permutation, combination, starJes, median, starling)
+module Utility exposing (factorial, permutation, combination, combinationStarling, starJes, median, starling)
 import Html.Attributes exposing (list)
 
 
@@ -47,6 +47,25 @@ combination n m =
     factorial n // (factorial (n - m) * factorial m)
 
 
+{-| starling
+## スターリングの公式
+階乗計算を指数計算で近似する公式(よく似た数値を叩き出す。)
+starling 100
+OUT 363.74
+-}
+starling:Int -> Float
+starling n =
+    let
+        loge = logBase Basics.e
+    in
+        (toFloat n + 0.5) * ( loge (toFloat n)) - (toFloat n) + 0.5 * loge 2 * Basics.pi 
+
+
+combinationStarling:Int -> Int -> Float
+combinationStarling n m =
+    starling n / (starling (n - m) * starling m)
+
+
 {-| starJes
 スタージェスの公式、これを求めることでグラフの階級数を求められます。
 
@@ -78,13 +97,3 @@ median list =
      else
         c
         
-
-{-| starling
-## スターリングの公式
-階乗計算を指数計算で近似する公式(よく似た数値を叩き出す。)
-@example starling 100
-OUT 363.74
--}
-starling:Int -> Float
-starling n =
-    logBase Basics.e (toFloat (factorial n))

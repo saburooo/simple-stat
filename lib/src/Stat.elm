@@ -308,7 +308,7 @@ biDistributionRecursion : Float -> Int -> Int -> List Float
 biDistributionRecursion p n c =
     case c of
         0 ->
-            biDistributionProbability p n c :: []
+            [ biDistributionProbability p n c ]
 
         _ ->
             biDistributionProbability p n c :: biDistributionRecursion p n (c - 1)
@@ -360,7 +360,7 @@ poissonDistributionRecursion : Float -> Int -> Int -> List Float
 poissonDistributionRecursion p n c =
     case c of
         0 ->
-            poissonDistributionProbability p n c :: []
+            [ poissonDistributionProbability p n c ]
 
         _ ->
             poissonDistributionProbability p n c :: poissonDistributionRecursion p n (c - 1)

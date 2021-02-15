@@ -3,15 +3,19 @@ module StatTest exposing (..)
 import Dict
 import Expect exposing (equal, equalDicts, equalLists, greaterThan, within)
 import List
-import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, biDistributionProbability, biDistribution)
+import Round exposing (roundNum)
 
-import Test exposing (Test, describe, test, todo)
+import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, biDistributionProbability, biDistribution)
 import Stat exposing (coefficientOfVariation, standardNormalV)
 import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData, shapeRetioList )
 import Utility exposing (factorial, permutation, combination, starJes, median, starling)
+import Distribution
+
+import Chart
+
+import Test exposing (Test, describe, test)
 import Test exposing (fuzz)
 import Fuzz exposing (float)
-import Round exposing (roundNum)
 
 
 calcuTest : Test
@@ -131,15 +135,7 @@ calcuTest =
             , test "変動係数" <|
                 \_ ->
                     0.303 |> within (Expect.Absolute 0.001) (coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ])
-            , test "階乗" <|
-                \_ ->
-                    equal 120 (factorial 5)
-            , test "順列" <|
-                \_ ->
-                    equal 720 (permutation 10 3)
-            , test "10人の中で3人を選ぶ組み合わせ" <|
-                \_ ->
-                    equal 120 (combination 10 3)
+
             , test "二項分布の確率密度。" <|
                 \_ ->
                     let
@@ -206,6 +202,20 @@ calcuTest =
             ]
         ]
 
+
+utilityTest:Test
+utilityTest =
+    describe "Utility.elmの中の関数のテスト" <|
+        [ test "階乗" <|
+            \_ ->
+                equal 120 (factorial 5)
+        , test "順列" <|
+            \_ ->
+                equal 720 (permutation 10 3)
+        , test "10人の中で3人を選ぶ組み合わせ" <|
+            \_ ->
+                equal 120 (combination 10 3)
+        ]
 
 
 {-
@@ -307,5 +317,29 @@ probalityTest =
     describe "様々な確率の公式のテスト"
         [ test "スターリングの公式これは階乗を指数で近似する公式のことである。" <|
             \_ ->
-                363.74 |> within (Expect.Absolute 0.001) ( roundNum 2 <| starling 100 )
+                363.91 |> within (Expect.Absolute 0.001) ( roundNum 2 <| starling 100 )
+        ]
+
+
+distributionTest:Test
+distributionTest =
+    describe "分布専用テスト"
+        [ test "超幾何分布のテスト" <|
+            \_ ->
+                0.41063 |> within (Expect.Absolute 0.0001) ( (Distribution.hypergeometric 1000 200 5 1) |> sqrt )
+        , test "超幾何分布のテスト(別パターン)" <|
+            \_ ->
+                0.32686 |> within (Expect.Absolute 0.0001) ( (Distribution.hypergeometric 1000 200 5 0) |> sqrt )
+        ]
+
+
+frequencyTest:Test
+frequencyTest =
+    describe "度数テスト"
+        [ test "度数に入れるかテスト" <|
+            \_ ->
+                equal ( ( (0, 6), 5 ) ) ( Chart.frequency (0, 6) [1,2,3,4,5,6] ) 
+        , test "度数のリストはどうなってるか" <|
+            \_ ->
+                equalDicts (Dict.fromList [((0,1.33),1),((1.33,2.67),1),((2.67,4),1),((4,5.33),2),((5.33,6.67),0)]) ( Chart.appendClass [1,2,3,4,5])
         ]
