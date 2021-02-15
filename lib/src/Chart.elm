@@ -175,4 +175,5 @@ circleMap tuple =
             , InEm.strokeWidth 4
             , strokeDashoffset (25 |> String.fromFloat)
             , strokeDasharray (( second * 10 |> String.fromFloat ) ++ "," ++ ( 100 - second * 10 |> String.fromFloat ))
+            -- , TypedSvg.animate [ Attributes.name "fill", Attributes.to first, Attributes.dur ( Types.Duration "1s" ) ] []
             ] []
