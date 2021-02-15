@@ -5,7 +5,6 @@ import Svg as Svg
 import TypedSvg.Attributes exposing (viewBox, width, height)
 import TypedSvg.Attributes exposing (points)
 import TypedSvg.Attributes exposing (fill)
-import TypedSvg.Attributes as Attributes
 import TypedSvg.Types as Types
 
 import Color
@@ -182,13 +181,14 @@ circleMap tuple =
             , fill Types.PaintNone
             , stroke ( Types.Paint ( Color.rgb ( first / 10 ) ( first / 10 ) ( first / 10 + 50 ) ) ) 
             , InEm.strokeWidth 4
-            , strokeDashoffset (25 |> String.fromFloat)
+            , strokeDashoffset "25"
             , strokeDasharray (( second * 10 |> String.fromFloat ) ++ "," ++ ( 100 - second * 10 |> String.fromFloat ))
             ]
             [ TypedSvg.animate
                 [ attributeName "stroke-dasharray"
                 , attributeType "xml"
-                , values ("0;" ++ String.fromFloat ( second ) ++ ";" ++ String.fromFloat ( second * 10 ) ++ ";" ++ String.fromFloat ( second * 10 ) ++ ";" ++ String.fromFloat ( 100 - second * 10))
-                , repeatCount ( RepeatIndefinite )
+                , values ((second * 10 |> String.fromFloat) ++ ";" ++ ( 100 - second * 10 |> String.fromFloat ))
+                , repeatCount ( Types.RepeatIndefinite )
                 , dur ( Types.Duration "3s" )
-                ] [] ]
+                ] []
+            ]
