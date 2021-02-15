@@ -28,6 +28,15 @@ import Utility
 import Svg exposing (text)
 import TypedSvg.Attributes exposing (strokeDashoffset)
 import TypedSvg.Attributes exposing (strokeDasharray)
+import TypedSvg.Types exposing (AttributeType(..))
+import TypedSvg.Types exposing (TimingValue(..))
+import TypedSvg exposing (animate)
+import Svg.Attributes exposing (attributeType)
+import Svg.Attributes exposing (values)
+import TypedSvg.Attributes exposing (dur)
+import TypedSvg.Attributes exposing (attributeName)
+import TypedSvg.Attributes exposing (repeatCount)
+import TypedSvg.Types exposing (RepeatCount(..))
 
 
 -- SVG
@@ -84,7 +93,7 @@ histgramBar x h =
         , fill (Types.Paint Color.blue)
         , strokeWidth (Types.px 2)
         , stroke ( Types.Paint Color.darkBlue )
-        ] []
+        ] [ animate [ attributeName "height", attributeType "xml", values ("0;" ++ String.fromFloat ( h * 20 ) ++ ";" ++ String.fromFloat ( h * 20 )), dur ( Types.Duration "3s" )  ] [] ]
 
 {-| 
 ## appendClass is a function that determines the class and the width of the class to produce a frequency.
@@ -175,5 +184,11 @@ circleMap tuple =
             , InEm.strokeWidth 4
             , strokeDashoffset (25 |> String.fromFloat)
             , strokeDasharray (( second * 10 |> String.fromFloat ) ++ "," ++ ( 100 - second * 10 |> String.fromFloat ))
-            -- , TypedSvg.animate [ Attributes.name "fill", Attributes.to first, Attributes.dur ( Types.Duration "1s" ) ] []
-            ] []
+            ]
+            [ TypedSvg.animate
+                [ attributeName "stroke-dasharray"
+                , attributeType "xml"
+                , values ("0;" ++ String.fromFloat ( second ) ++ ";" ++ String.fromFloat ( second * 10 ) ++ ";" ++ String.fromFloat ( second * 10 ) ++ ";" ++ String.fromFloat ( 100 - second * 10))
+                , repeatCount ( RepeatIndefinite )
+                , dur ( Types.Duration "3s" )
+                ] [] ]
