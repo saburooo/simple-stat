@@ -36,6 +36,8 @@ import TypedSvg.Attributes exposing (dur)
 import TypedSvg.Attributes exposing (attributeName)
 import TypedSvg.Attributes exposing (repeatCount)
 import TypedSvg.Types exposing (RepeatCount(..))
+import TypedSvg.Attributes exposing (repeatDur)
+import Svg.Attributes exposing (fillRule)
 
 
 -- SVG
@@ -174,21 +176,17 @@ circleMap tuple =
         first = Tuple.first tuple
         second = Tuple.second tuple
     in
-        TypedSvg.circle
+        TypedSvg.g [ ]
+        [ TypedSvg.circle
             [ InEm.cx 30
             , InEm.cy -5
             , InEm.r 2
             , fill Types.PaintNone
-            , stroke ( Types.Paint ( Color.rgb ( first / 10 ) ( first / 10 ) ( first / 10 + 50 ) ) ) 
+            , stroke ( Types.Paint ( Color.rgb ( first / 10 ) ( first / 10 ) ( second / 10 + 50 ) ) ) 
             , InEm.strokeWidth 4
-            , strokeDashoffset "25"
-            , strokeDasharray (( second * 10 |> String.fromFloat ) ++ "," ++ ( 100 - second * 10 |> String.fromFloat ))
+            , strokeDashoffset (25.0 - first * 25 |> String.fromFloat)
+            , strokeDasharray  ( ( second * 100 |> String.fromFloat ) ++ "," ++ ( 100 - second * 10 |> String.fromFloat ) )
             ]
-            [ TypedSvg.animate
-                [ attributeName "stroke-dasharray"
-                , attributeType "xml"
-                , values ((second * 10 |> String.fromFloat) ++ ";" ++ ( 100 - second * 10 |> String.fromFloat ))
-                , repeatCount ( Types.RepeatIndefinite )
-                , dur ( Types.Duration "3s" )
-                ] []
-            ]
+            []
+        , TypedSvg.text_ [ InEm.x 25, InEm.y ( -first - 2 ) ] [ Svg.text ( second |> String.fromFloat ) ]
+        ]
