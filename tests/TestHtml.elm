@@ -19,11 +19,10 @@ import Main exposing (stringToListFloat, listFloatToString)
 import Expect exposing (equal)
 import Expect exposing (equalLists)
 
+import Chart
+
 
 -- TODO HTMLのUIをどうする?まずはボタンを設計するか？
-
-type Msg
-    = Change String
 
 
 stringTest : Test
@@ -65,3 +64,18 @@ inputTest =
             ]
         ]
 
+
+calcTest : Test
+calcTest =
+    describe "グラフ用の計算テスト"
+      [ describe "計算用の関数"
+        [ test "特定の要素まで合計してくれるのか" <|
+          \() -> 
+            let
+                indexedMap = ( List.indexedMap Tuple.pair [3,4,5,6] )
+                  |> List.map (\c -> ( Tuple.first c |> toFloat, Tuple.second c ) )
+            in
+            
+            Expect.within (Expect.Absolute 0.001) 66.67 ( Chart.offsetPickUp (2, 5) indexedMap )
+        ]
+      ]

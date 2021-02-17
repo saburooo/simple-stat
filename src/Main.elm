@@ -156,10 +156,10 @@ stringToListFloat: String -> List Float
 stringToListFloat str =
     let
        strList = String.split "," str
+       digitList = List.map (\s -> String.filter Char.isDigit s) strList
     in
-      List.map (\s -> Maybe.withDefault 0 (String.toFloat s)) strList
+      List.map (\s -> Maybe.withDefault 0 (String.toFloat s)) digitList
         -- これだと０の値が本当に入っている場合に計算できない。
-        |> List.filter (\x -> x /= 0)
 
 
 {-|
@@ -252,6 +252,7 @@ topView model =
                                     [ oneValueView model.listOne "入力された値の平均値は：" Stat.average
                                     , manyValueView model.listOne "入力された値の偏差は右の値、グラフにすると以下" Stat.deviation
                                     , Chart.listGraph ( List.map (\o -> abs o ) ( Stat.deviation one ) )
+                                    , Chart.listCircle ( List.map (\o -> abs o ) ( Stat.deviation one ) )
                                     , oneValueView model.listOne "入力された値の標準偏差は：" Stat.standardDeviation
                                     , oneValueView model.listOne "入力された値の変動係数は：" Stat.coefficientOfVariation
                                     , oneValueView model.listOne "入力された値の中央値は：" Utility.median

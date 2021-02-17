@@ -4,7 +4,7 @@ import TypedSvg
 import Svg as Svg
 import TypedSvg.Attributes exposing (viewBox, width, height)
 import TypedSvg.Attributes exposing (points)
-import TypedSvg.Attributes exposing (fill)
+import TypedSvg.Attributes exposing (fill, from, to)
 import TypedSvg.Types as Types
 
 import Color
@@ -14,6 +14,7 @@ import Round exposing (roundNum)
 import TypedSvg.Attributes exposing (stroke)
 import TypedSvg.Attributes exposing (strokeWidth)
 import TypedSvg.Attributes exposing (transform)
+import TypedSvg.Attributes exposing (cx, cy, r)
 
 import TypedSvg.Attributes.InEm exposing (x1, x2, y1, y2)
 import TypedSvg.Attributes.InEm as InEm
@@ -36,6 +37,8 @@ import TypedSvg.Attributes exposing (dur)
 import TypedSvg.Attributes exposing (attributeName)
 import TypedSvg.Attributes exposing (repeatCount)
 import TypedSvg.Types exposing (RepeatCount(..))
+import TypedSvg.Attributes exposing (repeatDur)
+import Svg.Attributes exposing (fillRule)
 
 
 -- SVG
@@ -62,7 +65,7 @@ listVisualizeArgOne floatList =
         tupleFloatList = List.map2 Tuple.pair floatRange floatListMap
         headd = Maybe.withDefault 0 (List.head floatList)
     in
-        Svg.svg [ viewBox 0 0 500 250 ]
+        Svg.svg [ viewBox 0 0 500 250, width (Types.em 5) ]
             [ backColor Color.lightBlue
             , TypedSvg.g [ transform [ Types.Translate 0 200 ] ]
                 [ Svg.line [ x1 0, y1 0, x2 500, y2 0, strokeWidth (Types.px 3), stroke (Types.Paint Color.white) ] []
@@ -92,7 +95,7 @@ histgramBar x h =
         , fill (Types.Paint Color.blue)
         , strokeWidth (Types.px 2)
         , stroke ( Types.Paint Color.darkBlue )
-        ] [ animate [ attributeName "height", attributeType "xml", values ("0;" ++ String.fromFloat ( h * 20 ) ++ ";" ++ String.fromFloat ( h * 20 )), dur ( Types.Duration "3s" )  ] [] ]
+        ] [ animate [ attributeName "height", attributeType "xml", from 0, to ( h*20 ), dur ( Types.Duration "5s" )  ] [] ]
 
 {-| 
 ## appendClass is a function that determines the class and the width of the class to produce a frequency.
@@ -137,7 +140,6 @@ listGraph floatList =
             , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] ( List.map (\l -> lineGrid l) graphRange )
             , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] (List.map (\h -> histgramBar ( ( Tuple.first h ) + 1 ) ( Tuple.second h )) inserted)
             , TypedSvg.text_ [ transform [ Types.Translate 0 230 ], fontSize 0.7, fill (Types.Paint Color.white) ] [ text ( listTupleStr (Dict.keys indexed) ) ]
-            , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] ( List.map (\c -> circleMap c) inserted )
             ]
 
 
@@ -160,35 +162,40 @@ listCircle floatList =
         indexed = appendClass floatList
         dictRange = Dict.size indexed |> List.range 0 |> List.map (\x -> toFloat x) 
         inserted = List.map2 (Tuple.pair) dictRange (Dict.values indexed )
+        total = List.sum ( List.map (\c -> Tuple.second c) inserted )
     in
-        Svg.svg [ viewBox 0 0 800 250 ]
+        Svg.svg [ viewBox 0 0 63.6619772368 63.6619772368, width (Types.px 300) ]
         [ backColor Color.lightBlue
-        , TypedSvg.g [ transform [ Types.Translate 0 198 ] ] 
-            ( List.map (\c -> circleMap c) inserted )
+        , TypedSvg.g [ transform [ Types.Translate -0.1 63.5 ] ]
+            ( List.map (\c -> circleMap c total (offsetPickUp c inserted)) inserted )
         ]
 
 
-circleMap: (Float, Float) -> Svg.Svg msg
-circleMap tuple =
+offsetPickUp: (Float, Float) -> List (Float, Float) -> Float
+offsetPickUp tuple tupleList =
+    let
+        total = List.sum (List.map (\c -> Tuple.second c) tupleList)
+        pickUp = List.filter (\c -> Tuple.first c <= Tuple.first tuple) tupleList
+    in
+        List.foldl (+) 0 (List.map (\c -> Tuple.second c) pickUp) * 100 / total |> roundNum 2
+
+
+circleMap: (Float, Float) -> Float -> Float -> Svg.Svg msg
+circleMap tuple total offset =
     let
         first = Tuple.first tuple
-        second = Tuple.second tuple
+        counts = Tuple.second tuple
+        parcentage = 100.0 * counts / total
     in
         TypedSvg.circle
-            [ InEm.cx 30
-            , InEm.cy -5
-            , InEm.r 2
+            [ cx (Types.px 31.8309886184 )
+            , cy (Types.px -31.8309886184 )
+            , r (Types.px 15.9154943092 )
             , fill Types.PaintNone
-            , stroke ( Types.Paint ( Color.rgb ( first / 10 ) ( first / 10 ) ( first / 10 + 50 ) ) ) 
-            , InEm.strokeWidth 4
-            , strokeDashoffset "25"
-            , strokeDasharray (( second * 10 |> String.fromFloat ) ++ "," ++ ( 100 - second * 10 |> String.fromFloat ))
+            , stroke ( Types.Paint ( Color.rgb ( first / 10 ) ( first / 10 + 0.1 ) ( first / 10 + 0.25 ) ) ) 
+            , strokeWidth (Types.px 31.8309886184 )
+            , strokeDashoffset ( 25 - offset + parcentage |> String.fromFloat )
+            , strokeDasharray (( parcentage |> String.fromFloat ) ++ "," ++ ( 100.0 - parcentage |> String.fromFloat ))
             ]
-            [ TypedSvg.animate
-                [ attributeName "stroke-dasharray"
-                , attributeType "xml"
-                , values ((second * 10 |> String.fromFloat) ++ ";" ++ ( 100 - second * 10 |> String.fromFloat ))
-                , repeatCount ( Types.RepeatIndefinite )
-                , dur ( Types.Duration "3s" )
-                ] []
-            ]
+            [ ]
+
