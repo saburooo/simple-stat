@@ -9,7 +9,6 @@ import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, m
 import Stat exposing (coefficientOfVariation, standardNormalV)
 import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData, shapeRetioList )
 import Utility exposing (factorial, permutation, combination, starJes, median, starling)
-import Distribution
 
 import Chart
 
@@ -94,7 +93,6 @@ calcuTest =
                     listFloat
                         |> shapeRetioList
                         |> average
-                        |> Debug.log "output"
                         |> within (Expect.Absolute 0.001) 0
             , test "不等式で正規分布を表示" <|
                 \_ ->
@@ -320,17 +318,6 @@ probalityTest =
                 363.91 |> within (Expect.Absolute 0.001) ( roundNum 2 <| starling 100 )
         ]
 
-
-distributionTest:Test
-distributionTest =
-    describe "分布専用テスト"
-        [ test "超幾何分布のテスト" <|
-            \_ ->
-                0.41063 |> within (Expect.Absolute 0.0001) ( (Distribution.hypergeometric 1000 200 5 1) |> sqrt )
-        , test "超幾何分布のテスト(別パターン)" <|
-            \_ ->
-                0.32686 |> within (Expect.Absolute 0.0001) ( (Distribution.hypergeometric 1000 200 5 0) |> sqrt )
-        ]
 
 
 frequencyTest:Test

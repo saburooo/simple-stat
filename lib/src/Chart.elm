@@ -164,15 +164,24 @@ listCircle floatList =
         inserted = List.map2 (Tuple.pair) dictRange (Dict.values indexed )
         total = List.sum ( List.map (\c -> Tuple.second c) inserted )
     in
-        Svg.svg [ viewBox 0 0 63.6619772368 63.6619772368, width (Types.em 10) ]
+        Svg.svg [ viewBox 0 0 63.6619772368 63.6619772368, width (Types.px 300) ]
         [ backColor Color.lightBlue
-        , TypedSvg.g [ transform [ Types.Translate -2 68 ] ] 
-            ( List.map (\c -> circleMap c total) inserted )
+        , TypedSvg.g [ transform [ Types.Translate -0.1 63.5 ] ]
+            ( List.map (\c -> circleMap c total (offsetPickUp c inserted)) inserted )
         ]
 
 
-circleMap: (Float, Float) -> Float -> Svg.Svg msg
-circleMap tuple total =
+offsetPickUp: (Float, Float) -> List (Float, Float) -> Float
+offsetPickUp tuple tupleList =
+    let
+        total = List.sum (List.map (\c -> Tuple.second c) tupleList)
+        pickUp = List.filter (\c -> Tuple.first c <= Tuple.first tuple) tupleList
+    in
+        List.foldl (+) 0 (List.map (\c -> Tuple.second c) pickUp) * 100 / total |> roundNum 2
+
+
+circleMap: (Float, Float) -> Float -> Float -> Svg.Svg msg
+circleMap tuple total offset =
     let
         first = Tuple.first tuple
         counts = Tuple.second tuple
@@ -183,9 +192,9 @@ circleMap tuple total =
             , cy (Types.px -31.8309886184 )
             , r (Types.px 15.9154943092 )
             , fill Types.PaintNone
-            , stroke ( Types.Paint ( Color.rgb ( first / 10 ) ( first / 10 ) ( first / 10 + 5 ) ) ) 
+            , stroke ( Types.Paint ( Color.rgb ( first / 10 ) ( first / 10 + 0.1 ) ( first / 10 + 0.25 ) ) ) 
             , strokeWidth (Types.px 31.8309886184 )
-            , strokeDashoffset ( 25 |> String.fromFloat )
+            , strokeDashoffset ( 25 - offset + parcentage |> String.fromFloat )
             , strokeDasharray (( parcentage |> String.fromFloat ) ++ "," ++ ( 100.0 - parcentage |> String.fromFloat ))
             ]
             [ ]

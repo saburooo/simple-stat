@@ -156,10 +156,10 @@ stringToListFloat: String -> List Float
 stringToListFloat str =
     let
        strList = String.split "," str
+       digitList = List.map (\s -> String.filter Char.isDigit s) strList
     in
-      List.map (\s -> Maybe.withDefault 0 (String.toFloat s)) strList
+      List.map (\s -> Maybe.withDefault 0 (String.toFloat s)) digitList
         -- これだと０の値が本当に入っている場合に計算できない。
-        |> List.filter (\x -> x /= 0)
 
 
 {-|
