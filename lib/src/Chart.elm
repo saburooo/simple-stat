@@ -37,6 +37,8 @@ import TypedSvg.Attributes exposing (dur)
 import TypedSvg.Attributes exposing (attributeName)
 import TypedSvg.Attributes exposing (repeatCount)
 import TypedSvg.Types exposing (RepeatCount(..))
+import TypedSvg.Attributes exposing (repeatDur)
+import Svg.Attributes exposing (fillRule)
 
 
 -- SVG
@@ -187,3 +189,4 @@ circleMap tuple total =
             , strokeDasharray (( parcentage |> String.fromFloat ) ++ "," ++ ( 100.0 - parcentage |> String.fromFloat ))
             ]
             [ ]
+
