@@ -13,12 +13,10 @@ import Html.Attributes exposing (list)
 -}
 factorial : Int -> Int
 factorial n =
-    case n of
-        0 ->
-            1
-
-        _ ->
-            n * factorial (n - 1)
+    if n > 0 then
+        n * factorial (n - 1)
+    else
+        1
 
 
 {-| permutation

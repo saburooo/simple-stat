@@ -8,28 +8,30 @@
 -}
 -- TODO: どうやって某アナリティクス風のUIにしようか
 
-module Main exposing (..)
+module Main exposing (main)
 
 
+import Chart
 import Stat
 import Utility
 import Browser
 
 import Round exposing (roundNum)
 
+import Html
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onClick, on)
+
+import SubModule exposing (..)
 
 import Dict exposing (Dict)
 import List
-import Html.Events exposing (onClick)
-import Chart
-import Html
-import Html
-import Html
-import Html
-import Html
+
+import File exposing (File)
+import Json.Decode as D
+import Http
+import Fuzz exposing (result)
 
 
 -- MAIN
@@ -43,7 +45,6 @@ main =
         }
 
 
-
 -- MODEL
 
 type alias Model =
@@ -52,7 +53,15 @@ type alias Model =
     , listThree : String
     , route : Route
     , calcurate : Bool
+    , listFile : List File
+    , hState : HttpState
     }
+
+
+type HttpState
+    = Fail
+    | Wait
+    | Success
 
 
 -- URL
@@ -67,7 +76,7 @@ type Route
 
 init : () -> ( Model, Cmd Msg)
 init _  =
-    (Model "" "" "" Top False, Cmd.none)
+    (Model "" "" "" Top False [] Wait , Cmd.none)
 
 
 -- UPDATE
@@ -84,6 +93,8 @@ type Msg
     | Parcentage
     | Hypothesis
     | ClickCalc
+    | GotFile ( List File )
+    | Uploaded ( Result Http.Error () )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -144,50 +155,35 @@ update msg model =
                 , Cmd.none
                 )
 
+        GotFile file ->
+                ( { model | listFile = file }
+                , Cmd.batch ( List.map (\f -> upload f) model.listFile )
+                )
 
--- Utility
+        Uploaded result ->
+            case result of
+                Ok _ ->
+                    ( { model | hState = Success }
+                    , Cmd.none
+                    )
 
-
-{-|
-  stringToListFloat "1,2,3,4,5"
-  OUT [ 1.0, 2.0, 3.0, 4.0, 5.0 ]
--}
-stringToListFloat: String -> List Float
-stringToListFloat str =
-    let
-       strList = String.split "," str
-       digitList = List.map (\s -> String.filter Char.isDigit s) strList
-    in
-      List.map (\s -> Maybe.withDefault 0 (String.toFloat s)) digitList
-        -- これだと０の値が本当に入っている場合に計算できない。
-
-
-{-|
-受け取った List Float を文字列にしてくっつけたい
-listFloatToString [1.0, 2.0, 3.0, 4.0, 5.0]
-OUT "1.0, 2.0, 3.0, 4.0, 5.0"
--}
-listFloatToString:List Float -> String
-listFloatToString listFloat =
-    let
-        strChanged = List.map (\el -> String.fromFloat el) listFloat
-    in
-        String.join ", " strChanged
-
--- TODO 入力された値をリストにするのはいいとして果たしてそれがうまく行くのか
-
-dictInFloatToString: Dict String Float -> String -> Float
-dictInFloatToString dictFS str =
-  Maybe.withDefault 0 (Dict.get str dictFS)
+                Err _ ->
+                    ( { model | hState = Fail }
+                    , Cmd.none
+                    )
 
 
-strToIntList: String -> List Int
-strToIntList str =
-    let
-        splited = String.split "," str
-    in
-        List.map (\s -> Maybe.withDefault 0 (String.toInt s)) splited
-    
+upload : File.File -> Cmd Msg
+upload file =
+    Http.request
+        { method = "POST"
+        , headers = []
+        , url = "http://localhost:8000"
+        , body = Http.fileBody file
+        , expect = Http.expectWhatever Uploaded
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
 -- SUBSCRIPTIONS
@@ -503,4 +499,19 @@ distriView b one twoInt =
 calcButtonView : Html Msg
 calcButtonView =
     div [ class "level-right" ] 
-        [ button [ class "button is-large is-info", onClick ClickCalc ] [ text "計算する" ] ]
+        [ button [ class "button is-info", onClick ClickCalc ] [ text "計算する" ]
+        , label [ class "file button is-info" ] 
+            [ label [ class "file-label" ] [ text "ファイルを出す" ]
+            , input 
+                [ id "files"
+                , class "file-input"
+                , type_ "file"
+                , multiple True
+                , on "change" (D.map GotFile filesDecoder) ] [ ]
+            ]
+        ]
+
+
+filesDecoder: D.Decoder (List File)
+filesDecoder =
+    D.at ["target","files"] (D.list File.decoder)

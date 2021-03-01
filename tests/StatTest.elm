@@ -5,7 +5,7 @@ import Expect exposing (equal, equalDicts, equalLists, greaterThan, within)
 import List
 import Round exposing (roundNum)
 
-import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, biDistributionProbability, biDistribution)
+import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, biDistributionProbability, biDistribution)
 import Stat exposing (coefficientOfVariation, standardNormalV)
 import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData, shapeRetioList )
 import Utility exposing (factorial, permutation, combination, starJes, median, starling)
@@ -13,7 +13,7 @@ import Utility exposing (factorial, permutation, combination, starJes, median, s
 import Chart
 
 import Test exposing (Test, describe, test)
-import Test exposing (fuzz)
+import Test exposing (fuzz, fuzz2)
 import Fuzz exposing (float)
 
 
@@ -127,9 +127,6 @@ calcuTest =
                     in
                     Dict.fromList [ ( "min", 76.08 ), ( "max", 83.92 ) ]
                         |> equalDicts (muFiducialInterval standardAverage data sD)
-            , test "カイ二乗分布で求めるパーセンテージ" <|
-                \_ ->
-                    0.28 |> within (Expect.Absolute 0.01) (x2Distribution 3 6)
             , test "変動係数" <|
                 \_ ->
                     0.303 |> within (Expect.Absolute 0.001) (coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ])
@@ -149,6 +146,13 @@ calcuTest =
             , test "二項分布 <= 奇数編、その2" <|
                 \_ ->
                     equalLists [ 0.064, 0.288, 0.432, 0.216 ] (biDistribution 0.6 3)
+            {-
+            , fuzz2 Fuzz.float Fuzz.int "二項分布、合計したらちゃんと１になる？" <|
+                \f i ->
+                    Debug.log "input:"
+                    1.0 |> within (Expect.Absolute 0.001) ( biDistribution f i |> List.sum )
+                    |> Debug.log "output:"
+            -}
             , test "ポアソン分布" <|
                 \_ ->
                     equalLists [ 0.67032, 0.268128, 0.053626, 7.15e-3, 7.15e-4 ] (poisson 0.1 4)

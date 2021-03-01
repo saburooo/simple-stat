@@ -15,12 +15,14 @@ import Test exposing (fuzz)
 
 import Fuzz exposing (string)
 
-import Main exposing (stringToListFloat, listFloatToString)
+import SubModule exposing (..)
 import Expect exposing (equal)
 import Expect exposing (equalLists)
 
 import Chart
 
+type Msg
+  = Change String
 
 -- TODO HTMLのUIをどうする?まずはボタンを設計するか？
 

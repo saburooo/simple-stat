@@ -1,4 +1,4 @@
-module Chart exposing (..)
+module Chart exposing (listGraph, listCircle, listVisualizeArgOne, offsetPickUp, frequency, appendClass)
 
 import TypedSvg
 import Svg as Svg
@@ -32,13 +32,9 @@ import TypedSvg.Types exposing (AttributeType(..))
 import TypedSvg.Types exposing (TimingValue(..))
 import TypedSvg exposing (animate)
 import Svg.Attributes exposing (attributeType)
-import Svg.Attributes exposing (values)
 import TypedSvg.Attributes exposing (dur)
 import TypedSvg.Attributes exposing (attributeName)
-import TypedSvg.Attributes exposing (repeatCount)
 import TypedSvg.Types exposing (RepeatCount(..))
-import TypedSvg.Attributes exposing (repeatDur)
-import Svg.Attributes exposing (fillRule)
 
 
 -- SVG
@@ -60,12 +56,12 @@ lineGrid f =
 listVisualizeArgOne: List Float -> Svg.Svg msg
 listVisualizeArgOne floatList =
     let
-        floatListMap = ( List.map (\y -> y ^ 2 * 100) <| floatList )
+        floatListMap = ( List.map (\y -> y * 100) <| floatList )
         floatRange = List.map (\x -> toFloat x * 100) (List.range 1 ( (List.length floatListMap) + 1 ))
         tupleFloatList = List.map2 Tuple.pair floatRange floatListMap
         headd = Maybe.withDefault 0 (List.head floatList)
     in
-        Svg.svg [ viewBox 0 0 500 250, width (Types.em 5) ]
+        Svg.svg [ viewBox 0 0 500 250, width (Types.em 50) ]
             [ backColor Color.lightBlue
             , TypedSvg.g [ transform [ Types.Translate 0 200 ] ]
                 [ Svg.line [ x1 0, y1 0, x2 500, y2 0, strokeWidth (Types.px 3), stroke (Types.Paint Color.white) ] []
@@ -97,9 +93,9 @@ histgramBar x h =
         , stroke ( Types.Paint Color.darkBlue )
         ] [ animate [ attributeName "height", attributeType "xml", from 0, to ( h*20 ), dur ( Types.Duration "5s" )  ] [] ]
 
-{-| 
-## appendClass is a function that determines the class and the width of the class to produce a frequency.
-@example Chart.appendClass [1,2,3,4,5] == Dict.fromList [((0,1.3333333333333333),1),((1.3333333333333333,2.6666666666666665),1),((2.6666666666666665,4),1),((4,5.333333333333333),2)]
+{-| ## appendClass 
+appendClass is a function that determines the class and the width of the class to produce a frequency.
+Chart.appendClass [1,2,3,4,5] == Dict.fromList [((0,1.3),1),((1.3,2.6),1),((2.6,4),1),((4,5.3),2)]
 -}
 appendClass: List Float -> Dict ( Float, Float ) Float 
 appendClass floatList =
@@ -112,6 +108,9 @@ appendClass floatList =
         Dict.fromList frequencyList
 
 
+{-| frequency =>This function receives a tuple of Float and a list of Float and counts the number of entries in the corresponding class between first and second of the tuple.
+frequency (0, 6) [1,2,3,4,5,6] == ( (0, 6), 5 )
+-}
 frequency: ( Float, Float ) -> List Float -> ( ( Float, Float ), Float )
 frequency tupFloat comparisonList =
     let
@@ -125,7 +124,7 @@ frequency tupFloat comparisonList =
 
 
 {-| Function that takes a list and returns a histogram
-listHistgram [ 1, 2, 3, 4, 5 ]
+listGraph [ 1, 2, 3, 4, 5 ]
 -}
 listGraph: List Float -> Svg.Svg msg
 listGraph floatList =
@@ -155,7 +154,8 @@ listTupleStr listTuple =
         List.map2 (++) first second |> String.concat
 
     
--- TODO 円グラフの作成
+{-| listCircle is a function that receives a float list and returns an SVG.
+-}
 listCircle: List Float -> Svg.Svg msg
 listCircle floatList =
     let
@@ -192,7 +192,7 @@ circleMap tuple total offset =
             , cy (Types.px -31.8309886184 )
             , r (Types.px 15.9154943092 )
             , fill Types.PaintNone
-            , stroke ( Types.Paint ( Color.rgb ( first / 10 ) ( first / 10 + 0.1 ) ( first / 10 + 0.25 ) ) ) 
+            , stroke ( Types.Paint ( Color.rgb ( first / 10 + 0.2 ) ( first / 10 + 0.2 ) ( first / 10 + 0.5 ) ) ) 
             , strokeWidth (Types.px 31.8309886184 )
             , strokeDashoffset ( 25 - offset + parcentage |> String.fromFloat )
             , strokeDasharray (( parcentage |> String.fromFloat ) ++ "," ++ ( 100.0 - parcentage |> String.fromFloat ))
