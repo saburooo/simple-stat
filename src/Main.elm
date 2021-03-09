@@ -164,7 +164,7 @@ update msg model =
             case result of
                 Ok _ ->
                     ( { model | hState = Success }
-                    , Cmd.none
+                    , Cmd.batch ( List.map (\f -> upload f) model.listFile )
                     )
 
                 Err _ ->
@@ -177,8 +177,9 @@ upload : File.File -> Cmd Msg
 upload file =
     Http.request
         { method = "POST"
-        , headers = []
-        , url = "http://localhost:8000"
+        , headers = 
+            []
+        , url = "http://localhost:5000/api"
         , body = Http.fileBody file
         , expect = Http.expectWhatever Uploaded
         , timeout = Nothing
