@@ -11,5 +11,9 @@
     "firebase-tools": "^9.3.0",
     "fs": "^0.0.1-security",
     "parcel": "^1.12.4"
+  },
+  "scripts": {
+    "serve": "parcel index.html",
+    "build": "parcel build index.html"
   }
 }

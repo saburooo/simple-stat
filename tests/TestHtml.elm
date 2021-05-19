@@ -4,6 +4,8 @@ import Test.Html.Event as Event
 import Test.Html.Query as Query
 import Test exposing (test)
 
+import Json.Decode as D
+
 import Html
 
 import Html

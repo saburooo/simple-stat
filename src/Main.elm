@@ -14,7 +14,7 @@ module Main exposing (main)
 import Chart
 import Stat
 import Utility
-import Browser
+import Receive
 
 import Round exposing (roundNum)
 
@@ -22,6 +22,7 @@ import Html
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick, on)
+import Browser
 
 import SubModule exposing (..)
 
@@ -54,14 +55,9 @@ type alias Model =
     , route : Route
     , calcurate : Bool
     , listFile : List File
-    , hState : HttpState
+    , hState : Receive.HttpState
+    , dictState : Receive.DictState
     }
-
-
-type HttpState
-    = Fail
-    | Wait
-    | Success
 
 
 -- URL
@@ -76,7 +72,7 @@ type Route
 
 init : () -> ( Model, Cmd Msg)
 init _  =
-    (Model "" "" "" Top False [] Wait , Cmd.none)
+    (Model "" "" "" Top False [] Receive.Wait Receive.Waitin, Cmd.none)
 
 
 -- UPDATE
@@ -95,6 +91,7 @@ type Msg
     | ClickCalc
     | GotFile ( List File )
     | Uploaded ( Result Http.Error () )
+    | GotDict ( Result Http.Error Receive.SelectDict )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -163,12 +160,25 @@ update msg model =
         Uploaded result ->
             case result of
                 Ok _ ->
-                    ( { model | hState = Success }
-                    , Cmd.batch ( List.map (\f -> upload f) model.listFile )
+                    ( { model | hState = Receive.Success }
+                    -- Uploadに成功したらデータが来るのを待ち受けるイメージ
+                    , getSelector
                     )
 
                 Err _ ->
-                    ( { model | hState = Fail }
+                    ( { model | hState = Receive.Fail }
+                    , Cmd.none
+                    )
+
+        GotDict d ->
+            case d of
+               Ok _ ->
+                    ( { model | dictState = Receive.SuccessJoin }
+                    , getSelector
+                    )
+
+               Err _ ->
+                    ( { model | dictState = Receive.Failue }
                     , Cmd.none
                     )
 
@@ -185,6 +195,25 @@ upload file =
         , timeout = Nothing
         , tracker = Nothing
         }
+
+
+getSelector : Cmd Msg
+getSelector = 
+    Http.request
+        { method = "GET"
+        , headers = 
+            []
+        , url = "http://localhost:5000/question"
+        , body = Http.emptyBody
+        , expect = Http.expectWhatever Uploaded
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+getCsvFile : Cmd Msg
+getCsvFile =
+    Debug.todo "CSVファイルをどうやって受け取るか"
 
 
 -- SUBSCRIPTIONS
@@ -221,7 +250,7 @@ view model =
                 ]
                 , div [ class "column is-two-thirds" ]
                     [ div [ class "message is-medium is-info" ] [ topView model ]
-                    , br [] []
+                    , div [ class "message is-medium is-info" ] [ hstateView model.hState ]
                     ]
             ]
         ]
@@ -516,3 +545,16 @@ calcButtonView =
 filesDecoder: D.Decoder (List File)
 filesDecoder =
     D.at ["target","files"] (D.list File.decoder)
+
+
+hstateView : Receive.HttpState -> Html Msg
+hstateView httpState =
+    case httpState of
+        Receive.Fail ->
+            div [] [ text "Fail" ]
+
+        Receive.Wait ->
+            div [] [ text "Wait" ]
+
+        Receive.Success ->
+            div [] [ text "Success" ]

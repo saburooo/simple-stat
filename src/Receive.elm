@@ -1,19 +1,51 @@
 module Receive exposing (..)
 
 import Json.Decode as D
-import Http
 import Html exposing (..)
-import List
+import Dict exposing (Dict)
+import Csv
 
 
-type Msg
-    = GotStrOne String
-    | GotStrTwo String
+type HttpState
+    = Fail
+    | Wait
+    | Success
 
 
-getApiList : Cmd Msg
-getApiList =
-    Http.get
-        { url = "http://127.0.0.1:5000/api"
-        , expect = Http.expectString 
-        }
+type DictState
+    = Failue
+    | Waitin
+    | SuccessJoin
+
+
+{-
+受け取るデータの色々
+-}
+type alias DualList =
+    { listOne : String
+    , listTwo : String
+    }
+
+
+type alias Dist =
+    {}
+
+
+listDecoder : D.Decoder DualList
+listDecoder =
+    D.map2 DualList
+        (D.field "listOne" D.string)
+        (D.field "listTwo" D.string)
+
+
+selectDictDecoder : D.Decoder SelectDict
+selectDictDecoder =
+    Csv.Decode.
+
+
+{-
+ファイルをアップロードしてそのデータをもとに加工されたデータを受け取りたい。
+つまりアップデートするさいに行う処理の中にデータを受け取ることが考えられる。
+タプルで受け取ろうにもfieldの問題でいい感じに受け取れない。
+まず思ったのはHTTP関連は１つのファイルでなんとかしたほうがいいということ
+-}
