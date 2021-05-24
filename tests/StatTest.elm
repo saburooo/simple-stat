@@ -5,7 +5,7 @@ import Expect exposing (equal, equalDicts, equalLists, greaterThan, within)
 import List
 import Round exposing (roundNum)
 
-import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, x2Distribution, biDistributionProbability, biDistribution)
+import Stat exposing (average, deviation, fiducialInterval, hypothesisTesting, muFiducialInterval, shapeRetio, standardDeviation, biDistributionProbability, biDistribution)
 import Stat exposing (coefficientOfVariation, standardNormalV)
 import Stat exposing (olsRawData,poisson, sDNForDict, confidenceLimit, rawData, classifiedData, popMeanD, chiSquare, popStandardD, hypothesisForAlpha, hypothesisNotAlpha, regressionAnalysisRaw,olsClassifiedData, shapeRetioList )
 import Utility exposing (factorial, permutation, combination, starJes, median, starling)
@@ -100,8 +100,8 @@ calcuTest =
                         n =
                             100
                     in
-                    Dict.fromList [ ( "min", 40.2 ), ( "max", 59.8 ) ]
-                        |> equalDicts (hypothesisTesting n)
+                    Stat.MinMax 40.2 59.8
+                        |> equal (hypothesisTesting n)
             , test "95%信頼区間" <|
                 \_ ->
                     let
@@ -111,8 +111,8 @@ calcuTest =
                         sD =
                             5
                     in
-                    Dict.fromList [ ( "min", 10.2 ), ( "max", 29.8 ) ]
-                        |> equalDicts (fiducialInterval data sD)
+                    Stat.MinMax 10.2 29.8
+                        |> equal (fiducialInterval data sD)
             , test "母平均μの95%信頼区間" <|
                 \_ ->
                     let
@@ -125,11 +125,8 @@ calcuTest =
                         standardAverage =
                             80
                     in
-                    Dict.fromList [ ( "min", 76.08 ), ( "max", 83.92 ) ]
-                        |> equalDicts (muFiducialInterval standardAverage data sD)
-            , test "カイ二乗分布で求めるパーセンテージ" <|
-                \_ ->
-                    0.28 |> within (Expect.Absolute 0.01) (x2Distribution 3 6)
+                    Stat.MinMax 76.08 83.92
+                        |> equal (muFiducialInterval standardAverage data sD)
             , test "変動係数" <|
                 \_ ->
                     0.303 |> within (Expect.Absolute 0.001) (coefficientOfVariation [ 25, 18, 30, 19, 28, 40 ])

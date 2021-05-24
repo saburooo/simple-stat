@@ -23,6 +23,7 @@ import Chart
 
 
 -- TODO HTMLのUIをどうする?まずはボタンを設計するか？
+type Change = String
 
 
 stringTest : Test

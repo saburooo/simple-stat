@@ -129,6 +129,11 @@ shapeRetioList dataList =
           result
 
 
+-- TODO ここをtype aliasにする。
+type alias MinMax =
+    { min : Float
+    , max : Float
+    }
 {- 仮説検定の英訳、もっといい英訳があるかもしれない
 
    hypothesisTesting 100
@@ -137,7 +142,7 @@ shapeRetioList dataList =
 -}
 
 
-hypothesisTesting : Float -> Dict String Float
+hypothesisTesting : Float -> MinMax
 hypothesisTesting n =
     let
         mu =
@@ -146,7 +151,7 @@ hypothesisTesting n =
         sigma =
             sqrt n / 2
     in
-    Dict.fromList [ ( "min", (-1.96 * sigma) + mu ), ( "max", (1.96 * sigma) + mu ) ]
+        MinMax ( (-1.96 * sigma) + mu ) ( (1.96 * sigma) + mu )
 
 
 
@@ -158,7 +163,7 @@ hypothesisTesting n =
 -}
 
 
-fiducialInterval : Float -> Float -> Dict String Float
+fiducialInterval : Float -> Float -> MinMax
 fiducialInterval data sD =
     let
         minmu =
@@ -167,7 +172,7 @@ fiducialInterval data sD =
         maxmu =
             abs ((-1.96 * sD) - data)
     in
-    Dict.fromList [ ( "min", minmu ), ( "max", maxmu ) ]
+    MinMax minmu maxmu
 
 
 
@@ -179,7 +184,7 @@ fiducialInterval data sD =
 -}
 
 
-muFiducialInterval : Float -> Float -> Float -> Dict String Float
+muFiducialInterval : Float -> Float -> Float -> MinMax
 muFiducialInterval standardAverage data sD =
     let
         minmu =
@@ -188,96 +193,8 @@ muFiducialInterval standardAverage data sD =
         maxmu =
             abs (standardAverage + (1.96 * (sD / sqrt data)))
     in
-    Dict.fromList [ ( "min", minmu ), ( "max", maxmu ) ]
+        MinMax minmu maxmu
 
-
-
-{- 自由度からカイ二乗分布を引っ張り出す関数
-   -- 正直いい解決方法ではない、何故なら自由度によってこの分布は変わってしまうからだ
-   -- TODO 自由度によってカイ二乗分布を変えていくような関数を用意したい。
-   -- この数値は「完全独習　統計学入門」という書籍の自由度３のカイ二乗分布である。
-
-       pickUpDegreeOfFreedom 1
-
-       -- OUT 0.8012
-
--}
-
-
-pickUpDegreeOfFreedom : Int -> Float
-pickUpDegreeOfFreedom x =
-    let
-        -- これ自由度が3の場合のカイ二乗分布だからな・・・
-        xDict =
-            Dict.fromList
-                [ ( 0, 1 )
-                , ( 1, 0.8012 )
-                , ( 2, 0.5724 )
-                , ( 3, 0.3916 )
-                , ( 4, 0.2614 )
-                , ( 5, 0.1717 )
-                , ( 6, 0.1116 )
-                , ( 7, 0.0718 )
-                , ( 8, 0.046 )
-                , ( 9, 0.0292 )
-                , ( 10, 0.0185 )
-                ]
-    in
-    case x of
-        1 ->
-            Maybe.withDefault 0 (Dict.get 1 xDict)
-
-        2 ->
-            Maybe.withDefault 0 (Dict.get 2 xDict)
-
-        3 ->
-            Maybe.withDefault 0 (Dict.get 3 xDict)
-
-        4 ->
-            Maybe.withDefault 0 (Dict.get 4 xDict)
-
-        5 ->
-            Maybe.withDefault 0 (Dict.get 5 xDict)
-
-        6 ->
-            Maybe.withDefault 0 (Dict.get 6 xDict)
-
-        7 ->
-            Maybe.withDefault 0 (Dict.get 7 xDict)
-
-        8 ->
-            Maybe.withDefault 0 (Dict.get 8 xDict)
-
-        9 ->
-            Maybe.withDefault 0 (Dict.get 9 xDict)
-
-        10 ->
-            Maybe.withDefault 0 (Dict.get 10 xDict)
-
-        _ ->
-            Maybe.withDefault 0 (Dict.get 0 xDict)
-
-
-
-{- カイ二乗分布でおそらく一番実装が大変なことになる。
-   正確にはカイ二乗分布の表から2つ値を取り出し、引き算を行う関数
-
-       x2Distribution 3 6
-
-       -- OUT 0.28
--}
-
-
-x2Distribution : Int -> Int -> Float
-x2Distribution x1 x2 =
-    let
-        z1 =
-            pickUpDegreeOfFreedom x1
-
-        z2 =
-            pickUpDegreeOfFreedom x2
-    in
-    z1 - z2
 
 
 {-| chiSquare
@@ -304,16 +221,6 @@ biDistributionProbability p n c =
     (toFloat (combination n c) / 1) * (p ^ toFloat c) * ((1 - p) ^ toFloat (n - c))
 
 
-biDistributionRecursion : Float -> Int -> Int -> List Float
-biDistributionRecursion p n c =
-    case c of
-        0 ->
-            [ biDistributionProbability p n c ]
-
-        _ ->
-            biDistributionProbability p n c :: biDistributionRecursion p n (c - 1)
-
-
 {-| biDistribution
 二項分布、再帰で求めるその数をなんとかそれっぽくするため
 ひっくり返します。
@@ -330,7 +237,10 @@ biDistributionRecursion p n c =
 -}
 biDistribution : Float -> Int -> List Float
 biDistribution p n =
-    List.reverse (List.map (\x -> roundNum n x) (biDistributionRecursion p n n))
+    let
+        lRange = List.range 0 n
+    in
+        List.map (\x -> biDistributionProbability p n x |> roundNum 4) lRange 
 
 
 {-| poissonDistributionProbability
@@ -356,27 +266,15 @@ poissonDistributionProbability p n c =
     el * (mu ^ toFloat c) / toFloat (factorial c)
 
 
-poissonDistributionRecursion : Float -> Int -> Int -> List Float
-poissonDistributionRecursion p n c =
-    case c of
-        0 ->
-            [ poissonDistributionProbability p n c ]
-
-        _ ->
-            poissonDistributionProbability p n c :: poissonDistributionRecursion p n (c - 1)
-
-
 {-| poisson
-再帰の都合上逆向きになるので逆さまにひっくり返す。
-
-    poisson 0.1 4
-
-    OUT [ 0.6703, 0.2681, 0.0536, 7.15e-3, 7.15e-4 ]
-
+    poisson 0.1 4 -- OUT [ 0.67032, 0.268128, 0.053626, 7.15e-3, 7.15e-4 ]
 -}
 poisson : Float -> Int -> List Float
 poisson p n =
-    List.reverse (List.map (\x -> roundNum 6 x) (poissonDistributionRecursion p n n))
+    let
+        lRange = List.range 0 n
+    in
+        List.map (\x -> poissonDistributionProbability p n x |> roundNum 6) lRange   
 
 
 {-| standardNormalV

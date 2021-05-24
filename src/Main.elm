@@ -10,26 +10,21 @@
 
 module Main exposing (..)
 
-
-import Stat
-import Utility
-import Browser
-
-import Round exposing (roundNum)
-
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onClick)
 
 import Dict exposing (Dict)
 import List
-import Html.Events exposing (onClick)
+
+import Stat
 import Chart
-import Html
-import Html
-import Html
-import Html
-import Html
+import Utility
+
+import Browser
+
+import Round exposing (roundNum)
+import Stat exposing (MinMax)
 
 
 -- MAIN
@@ -365,11 +360,11 @@ manyValueView listFloat strText funcL =
     div [] [ Html.td [] [text <| strText], Html.td [] [ text <| listFloatToString <| List.map (\x -> roundNum 4 x) <| funcL <| stringToListFloat listFloat ] ]
 
 
-fiducialView: Dict String Float -> Html Msg
-fiducialView fiducialDict =
+fiducialView: MinMax -> Html Msg
+fiducialView fiducial =
   let
-      mini = (String.fromFloat <| roundNum 4 <| Maybe.withDefault 0 (Dict.get "min" fiducialDict))
-      maxi = (String.fromFloat <| roundNum 4 <| Maybe.withDefault 0 (Dict.get "max" fiducialDict))
+      mini = (String.fromFloat <| roundNum 4 <| fiducial.min)
+      maxi = (String.fromFloat <| roundNum 4 <| fiducial.max)
   in
     div [] [ Html.td [] [ text "信頼区間の...", text ("最小値は" ++ mini), text ("最大値は" ++ maxi) ]   ]
 
