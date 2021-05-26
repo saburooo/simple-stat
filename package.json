@@ -10,5 +10,10 @@
     "elmi-to-json": "^1.3.0",
     "firebase-tools": "^9.3.0",
     "parcel": "^1.12.4"
+  },
+  "scripts": {
+    "test": "elm-test",
+    "build": "parcel build index.html",
+    "server": "parcel index.html"
   }
 }

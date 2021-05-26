@@ -206,6 +206,7 @@ view model =
             [
                 div [ class "column is-one-thirds panel is-info" ]
                 [ h1 [ class "title panel-heading"] [ text "メニューです" ]
+                    , p [ ] [ text ",間隔で半角の数字を入力してください。" ]
                     , nav [ class "nav" ] 
                         [ ul [ class "panel-headering" ]
                             [ buttonLink TopPage "平均値"
