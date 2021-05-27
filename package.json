@@ -14,6 +14,7 @@
   "scripts": {
     "test": "elm-test",
     "build": "parcel build index.html",
-    "server": "parcel index.html"
+    "server": "parcel index.html",
+    "format": "elm-format"
   }
 }
