@@ -235,7 +235,7 @@ topView model =
                             Html.table [ class "table is-bordered" ]
                                 [ if model.niigata == True then
                                     Html.tr [] 
-                                        [ p [ ] [ text "新潟県の2018年から2020年までの総人口から計算" ]
+                                        [ p [ ] [ text "新潟県の2018年から2020年までの１ヶ月ごとの総人口から計算" ]
                                         , oneValueView SampleData.niigataData "入力された値の平均値は：" Stat.average
                                         , manyValueView SampleData.niigataData "入力された値の偏差は右の値、グラフにすると以下" Stat.deviation
                                         , Chart.listGraph ( List.map (\o -> abs o ) ( Stat.deviation ( stringToListFloat SampleData.niigataData ) ) )
@@ -262,6 +262,9 @@ topView model =
                         else
                             p [] [ text "計算する待ちです。" ]
                         , h2 [ class "subtitle is-4" ] [ text "解説" ]
+                        , p [] [ text "平均値とは全体のデータを受け取って真ん中の値を返す計算式のことでこのアプリで求められる平均は「算術平均」と呼ばれる。" ]
+                        , p [] [ text "このように求められた値は別名代表値という" ]
+                        , p [] [ text "代表値には様々な求め方があり、同じ平均でも幾何平均、調和平均等がありそれぞれ相応しい用い方を求められる。" ]
                     ]
 
             Ols ->
@@ -273,10 +276,20 @@ topView model =
                 , calcButtonView
                 , niigataButtonView model
                 , if model.calcurate == True then
-                    div []
-                        [ olsRawDataView one two
-                        , olsClassifiedDataView one two three
-                        ]
+                    if model.niigata == True then
+                        div []
+                            [ p [ ] [ text "取得したデータ" ]
+                            [ p [ ] [ text "新潟県の2018年時点での月間人口:" ++ SampleData.niigata2018 ]
+                            [ p [ ] [ text "新潟県の2019年時点での月間人口:" ++ SampleData.niigata2019 ]
+                            [ p [ ] [ text "新潟県の2020年時点での月間人口:" ++ SampleData.niigata2020 ]
+                            , olsRawDataView SampleData.niigata2018ToFloat SampleData.niigata2019ToFloat
+                            , olsClassifiedDataView SampleData.niigata2018ToFloat SampleData.niigata2019ToFloat SampleData.niigata2020ToFloat
+                            ]
+                    else
+                        div []
+                            [ olsRawDataView one two
+                            , olsClassifiedDataView one two three
+                            ]
                 else
                     p [] [ text "ボタンを押してね" ]
                 ]
@@ -288,9 +301,14 @@ topView model =
                 , inputView "リストその２" ", 間隔で数字を入力してね。" model.listTwo TwoList
                 , niigataButtonView model
                 , if model.calcurate == True then
-                    div [] 
-                        [ regressionView one two three
-                        ]
+                    if model.niigata == True then
+                        div [] 
+                            [ regressionView SampleData.niigata2018ToFloat SampleData.niigata2019ToFloat SampleData.niigata2020ToFloat
+                            ]
+                    else
+                        div [] 
+                            [ regressionView one two three
+                            ]
                 else
                     p [] [ text "ボタンを押してね" ]
                 ]
