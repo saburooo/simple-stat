@@ -370,6 +370,37 @@ manyValueView listFloat strText funcL =
     div [] [ Html.td [] [text <| strText], Html.td [] [ text <| listFloatToString <| List.map (\x -> roundNum 4 x) <| funcL <| stringToListFloat listFloat ] ]
 
 
+{-| 解説するための関数
+-}
+commentary: Model.route -> Html Msg
+commentary route =
+    div [] [ h2 [ class "subtitle is-4" ] [ text "解説" ]
+                case route of
+                How ->
+                    div [] [ text ",間隔で半角数値を入力する以外に新潟県の人口推移を" ]
+
+                Top ->
+                    div [] [ text "TODO 平均などの解説を書く" ]
+
+                Ols ->
+                    div [] [ text "TODO 平均などの解説を書く" ]
+
+                Regres ->
+                    div [] [ text "TODO 平均などの解説を書く" ]
+
+                Dist ->
+                    div [] [ text "TODO 平均などの解説を書く" ]
+
+                Parcen ->
+                    div [] [ text "TODO 平均などの解説を書く" ]
+
+                Hypo ->
+                    div [] [ text "TODO 平均などの解説を書く" ]
+
+
+-- ここから計算結果のView
+
+
 fiducialView: MinMax -> Html Msg
 fiducialView fiducial =
   let
