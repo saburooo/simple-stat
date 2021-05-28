@@ -25,7 +25,6 @@ import MainUtility exposing (..)
 import Browser
 
 import Round exposing (roundNum)
-import Stat exposing (MinMax)
 
 
 -- MAIN
@@ -277,16 +276,16 @@ topView model =
                 , niigataButtonView model
                 , if model.calcurate == True then
                     if model.niigata == True then
-                        div []
+                        div [ ]
                             [ p [ ] [ text "取得したデータ" ]
-                            [ p [ ] [ text "新潟県の2018年時点での月間人口:" ++ SampleData.niigata2018 ]
-                            [ p [ ] [ text "新潟県の2019年時点での月間人口:" ++ SampleData.niigata2019 ]
-                            [ p [ ] [ text "新潟県の2020年時点での月間人口:" ++ SampleData.niigata2020 ]
+                            , p [ ] [ text ( "新潟県の2018年時点での月間人口:" ++ SampleData.niigata2018 ) ]
+                            , p [ ] [ text ( "新潟県の2019年時点での月間人口:" ++ SampleData.niigata2019 ) ]
+                            , p [ ] [ text ( "新潟県の2020年時点での月間人口:" ++ SampleData.niigata2020 ) ]
                             , olsRawDataView SampleData.niigata2018ToFloat SampleData.niigata2019ToFloat
                             , olsClassifiedDataView SampleData.niigata2018ToFloat SampleData.niigata2019ToFloat SampleData.niigata2020ToFloat
                             ]
                     else
-                        div []
+                        div [ ]
                             [ olsRawDataView one two
                             , olsClassifiedDataView one two three
                             ]
@@ -327,6 +326,7 @@ topView model =
                         ]
                 else
                     p [] [ text "ボタンを押してね" ]
+                , h2 [ class "subtitle" ] [ text "解説" ]
                 ]
 
             Parcen ->
@@ -388,7 +388,7 @@ manyValueView listFloat strText funcL =
     div [] [ Html.td [] [text <| strText], Html.td [] [ text <| listFloatToString <| List.map (\x -> roundNum 4 x) <| funcL <| stringToListFloat listFloat ] ]
 
 
-fiducialView: MinMax -> Html Msg
+fiducialView: Stat.MinMax -> Html Msg
 fiducialView fiducial =
   let
       mini = (String.fromFloat <| roundNum 4 <| fiducial.min)
