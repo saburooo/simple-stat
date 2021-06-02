@@ -195,7 +195,7 @@ view model =
                 ]
                 , div [ class "column is-two-thirds" ]
                     [ div [ class "message is-medium is-info" ] [ topView model ]
-                    , br [] []
+                    , commentary model.route
                     ]
             ]
         ]
@@ -232,9 +232,10 @@ topView model =
                         , niigataButtonView model
                         , if model.calcurate == True then
                             Html.table [ class "table is-bordered" ]
+                            -- TODO ここを関数化する。
                                 [ if model.niigata == True then
                                     Html.tr [] 
-                                        [ p [ ] [ text "新潟県の2018年から2020年までの１ヶ月ごとの総人口から計算" ]
+                                        [ p [ ] [ text "新潟県の2017年から2020年までの１ヶ月ごとの総人口から計算" ]
                                         , oneValueView SampleData.niigataData "入力された値の平均値は：" Stat.average
                                         , manyValueView SampleData.niigataData "入力された値の偏差は右の値、グラフにすると以下" Stat.deviation
                                         , Chart.listGraph ( List.map (\o -> abs o ) ( Stat.deviation ( stringToListFloat SampleData.niigataData ) ) )
@@ -260,11 +261,7 @@ topView model =
                                 ]
                         else
                             p [] [ text "計算する待ちです。" ]
-                        , h2 [ class "subtitle is-4" ] [ text "解説" ]
-                        , p [] [ text "平均値とは全体のデータを受け取って真ん中の値を返す計算式のことでこのアプリで求められる平均は「算術平均」と呼ばれる。" ]
-                        , p [] [ text "このように求められた値は別名代表値という" ]
-                        , p [] [ text "代表値には様々な求め方があり、同じ平均でも幾何平均、調和平均等がありそれぞれ相応しい用い方を求められる。" ]
-                    ]
+                        ]
 
             Ols ->
                 div [  ]
@@ -282,11 +279,13 @@ topView model =
                             , p [ ] [ text ( "新潟県の2019年時点での月間人口:" ++ SampleData.niigata2019 ) ]
                             , p [ ] [ text ( "新潟県の2020年時点での月間人口:" ++ SampleData.niigata2020 ) ]
                             , olsRawDataView SampleData.niigata2018ToFloat SampleData.niigata2019ToFloat
+                            , br [ ] []
                             , olsClassifiedDataView SampleData.niigata2018ToFloat SampleData.niigata2019ToFloat SampleData.niigata2020ToFloat
                             ]
                     else
                         div [ ]
                             [ olsRawDataView one two
+                            , br [ ] []
                             , olsClassifiedDataView one two three
                             ]
                 else
@@ -388,6 +387,56 @@ manyValueView listFloat strText funcL =
     div [] [ Html.td [] [text <| strText], Html.td [] [ text <| listFloatToString <| List.map (\x -> roundNum 4 x) <| funcL <| stringToListFloat listFloat ] ]
 
 
+{-| 解説するための関数
+-}
+commentary : Route -> Html Msg
+commentary route =
+    div [ ] [ h2 [ class "subtitle is-4" ] [ text "解説" ]
+            , div [ ] [ 
+                case route of
+                    How ->
+                        div [] [ text ",間隔で半角数値を入力する以外にオプションで新潟県の人口推移を調べることができます。" ]
+
+                    Top ->
+                        div [] [  p [] [ text "平均値について" ]
+                                , p [] [ text "全体のデータを受け取って真ん中の値を返す計算式のことでこのアプリで求められる平均は「算術平均」と呼ばれる。" ]
+                                , p [] [ text "このように求められた値は別名代表値という" ]
+                                , p [] [ text "代表値には様々な求め方があり、同じ平均でも幾何平均、調和平均等がありそれぞれ相応しい用い方を求められる。" ]
+                                , p [] [ text "分散について"]
+                                , p [] [ text "分散とはデータの散らばり具合のことである、この数値に√すると標準偏差になる。"]
+                                , p [] [ text "標準偏差について" ]
+                                , p [] [ text "標準偏差とはデータの平均からどれくらいのブレがあるのかを示す指標のこと" ]
+                        ]
+
+                    Ols ->
+                        div [] 
+                            [ p [] [ text "最小二乗法とは" ]
+                            , p [] [ text "予め2つの異なるデータには関係があると仮定して実際に得られたデータを作成し、" ]
+                            , p [] [ text "その中から最も2乗和したときの値が小さくなる2つの数値を求める方法である。" ]
+                            ]
+
+                    Regres ->
+                        div [] [ text "回帰分析の解説を書く" ]
+
+                    Dist ->
+                        div [] 
+                            [ p [] [ text "二項分布・ポアソン分布について" ]
+                            , p [] [ text ""]
+                            ]
+
+                    Parcen ->
+                        div [] [ text "確率の解説を書く" ]
+
+                    Hypo ->
+                        div [] [ text "仮説検定の解説を書く" ]
+            ]
+        ]
+
+
+
+-- ここから計算結果のView
+
+
 fiducialView: Stat.MinMax -> Html Msg
 fiducialView fiducial =
   let
@@ -407,12 +456,12 @@ olsRawDataView xi yi =
         r = dictInFloatToString ols "r"
     in
         div []
-            [ h2 [ class "subtitle" ] [ text "Raw data の場合の最小2乗法" ]
+            [ h2 [ class "subtitle is-3" ] [ text "Raw data の場合の最小2乗法" ]
             , ul []
-                [ li [] [ text ("勾配 = " ++ (String.fromFloat b) ) ]
-                , li [] [ text ("定数項 = " ++ (String.fromFloat a) )]
-                , li [] [ text ("決定係数 = " ++ (String.fromFloat r2 )) ]
-                , li [] [ text ("相関係数 = " ++ (String.fromFloat r )) ]
+                [ li [] [ text ("勾配 b = " ++ (String.fromFloat b) ) ]
+                , li [] [ text ("定数項 a = " ++ (String.fromFloat a) )]
+                , li [] [ text ("決定係数 r2 = " ++ (String.fromFloat r2 )) ]
+                , li [] [ text ("相関係数 r = " ++ (String.fromFloat r )) ]
                 ]
             ]
 
@@ -427,7 +476,7 @@ olsClassifiedDataView xi yi f =
         r = dictInFloatToString ols "r"
     in
         div []
-            [ h2 [ class "subtitle" ] [ text "Classified data の場合の最小2乗法" ]
+            [ h2 [ class "subtitle is-3" ] [ text "Classified data の場合の最小2乗法" ]
             , ul []
                 [ li [] [ text ("勾配 = " ++ (String.fromFloat b) ) ]
                 , li [] [ text ("定数項 = " ++ (String.fromFloat a) )]

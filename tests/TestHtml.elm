@@ -15,7 +15,7 @@ import Test exposing (fuzz)
 
 import Fuzz exposing (string)
 
-import Main exposing (stringToListFloat, listFloatToString)
+import MainUtility exposing (stringToListFloat, listFloatToString)
 import Expect exposing (equal)
 import Expect exposing (equalLists)
 
