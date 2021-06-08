@@ -222,6 +222,8 @@ topView model =
                     , p [ ] [ text "2019sukeijinkou.csv、新潟市、クリエイティブ・コモンズ・ライセンス 表示 2.1 日本" ]
                     , p [ ] [ text "2018sukeijinkou.csv、新潟市、クリエイティブ・コモンズ・ライセンス 表示 2.1 日本" ]
                     , a [ href "https://creativecommons.org/licenses/by/2.1/jp/" ] [ text "https://creativecommons.org/licenses/by/2.1/jp/（外部サイト）"]
+                    , br [] []
+                    , a [ href "http://www.data.jma.go.jp/gmd/risk/obsdl/index.php" ] [ text "出典：気象庁ホームページ" ]
                     ]
 
             Top ->
@@ -395,7 +397,7 @@ commentary route =
             , div [ ] [ 
                 case route of
                     How ->
-                        div [] [ text ",間隔で半角数値を入力する以外にオプションで新潟県の人口推移を調べることができます。" ]
+                        div [] [ text ",間隔で半角数値を入力する以外にオプションで新潟県の人口推移やそれ関連を調べることができます。" ]
 
                     Top ->
                         div [] [  p [] [ text "平均値について" ]
@@ -421,7 +423,8 @@ commentary route =
                     Dist ->
                         div [] 
                             [ p [] [ text "二項分布・ポアソン分布について" ]
-                            , p [] [ text ""]
+                            , p [] [ text "結果が白か黒かはっきりしていることを何度も行うことをベルヌーイ施行と呼ぶ、例えばコインの表と裏とかが当てはまる。" ]
+                            , p [] [ text "繰り返し実行していきながらグラフを作っていくとある一定の分布を形成していく、正直いい説明が思いつかないです。" ]
                             ]
 
                     Parcen ->
